@@ -3,12 +3,21 @@
 import React, { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { GlobeScene } from "./GlobeScene";
-import type { GeoCoordinate } from "@/types/spatial";
+import type { GeoCoordinate, PlaybackState } from "@/types/spatial";
 
 export interface GlobeCanvasProps {
   zoom?: number;
   resetOrientationTrigger?: number;
+  playbackState?: PlaybackState;
+  playbackSpeed?: number;
+  isTemperatureActive?: boolean;
+  temperatureOpacity?: number;
+  isPrecipitationActive?: boolean;
+  precipitationOpacity?: number;
+  progressPercent?: number;
+  monthOfYear?: number;
   onCoordinateChange?: (coord: GeoCoordinate) => void;
+  onZoomChange?: (zoom: number) => void;
 }
 
 function GlobeLoadingFallback() {
@@ -29,7 +38,16 @@ function GlobeLoadingFallback() {
 export function GlobeCanvas({
   zoom = 1.0,
   resetOrientationTrigger = 0,
+  playbackState = "paused",
+  playbackSpeed = 1,
+  isTemperatureActive = true,
+  temperatureOpacity = 0.75,
+  isPrecipitationActive = false,
+  precipitationOpacity = 0.65,
+  progressPercent = 85,
+  monthOfYear = 1.0,
   onCoordinateChange,
+  onZoomChange,
 }: GlobeCanvasProps) {
   return (
     <div className="relative w-full h-full">
@@ -46,7 +64,16 @@ export function GlobeCanvas({
           <GlobeScene
             zoom={zoom}
             resetOrientationTrigger={resetOrientationTrigger}
+            playbackState={playbackState}
+            playbackSpeed={playbackSpeed}
+            isTemperatureActive={isTemperatureActive}
+            temperatureOpacity={temperatureOpacity}
+            isPrecipitationActive={isPrecipitationActive}
+            precipitationOpacity={precipitationOpacity}
+            progressPercent={progressPercent}
+            monthOfYear={monthOfYear}
             onCoordinateChange={onCoordinateChange}
+            onZoomChange={onZoomChange}
           />
         </Canvas>
       </Suspense>

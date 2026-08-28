@@ -8,7 +8,7 @@ export interface GeographicGraticuleProps {
 }
 
 export function GeographicGraticule({ radius = 2 }: GeographicGraticuleProps) {
-  const graticuleRadius = radius * 1.002;
+  const graticuleRadius = radius * 1.007;
 
   // Standard graticule lines
   const geometry = useMemo(() => {

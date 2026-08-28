@@ -31,13 +31,40 @@ export function TemporalRegion({
   className = "",
 }: TemporalRegionProps) {
   const trackRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
 
-  const handleTrackClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const updateFromPointer = (clientX: number) => {
     if (!trackRef.current || !onSeek) return;
     const rect = trackRef.current.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
+    const clickX = clientX - rect.left;
     const newPercent = Math.max(0, Math.min(100, (clickX / rect.width) * 100));
     onSeek(newPercent);
+  };
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    isDraggingRef.current = true;
+    try {
+      (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+    } catch {
+      // Fallback if pointer capture is not supported
+    }
+    updateFromPointer(e.clientX);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDraggingRef.current) return;
+    updateFromPointer(e.clientX);
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isDraggingRef.current) {
+      isDraggingRef.current = false;
+      try {
+        (e.target as HTMLElement).releasePointerCapture?.(e.pointerId);
+      } catch {
+        // Fallback
+      }
+    }
   };
 
   return (
@@ -56,37 +83,41 @@ export function TemporalRegion({
       {/* 2. Timeline Track with Playhead & Ticks */}
       <div
         ref={trackRef}
-        onClick={handleTrackClick}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
         role="slider"
         aria-label="Timeline scrubber"
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(progressPercent)}
-        className="flex-1 h-6 relative flex items-center cursor-pointer group"
+        className="flex-1 h-8 relative flex items-center cursor-pointer select-none group touch-none"
       >
-        {/* Track Background */}
-        <div className="absolute left-0 right-0 h-1 bg-aether-border rounded-sm group-hover:h-1.5 transition-all" />
+        {/* Track Background Rail */}
+        <div className="absolute left-0 right-0 h-1 bg-aether-border/60 rounded-full group-hover:h-1.5 transition-[height]" />
 
-        {/* Filled Progress Bar */}
+        {/* Active Played Line (Moves in 100% lockstep with pointer thumb, zero delay) */}
         <div
-          className="absolute left-0 h-1 bg-aether-accent opacity-50 rounded-sm group-hover:h-1.5 transition-all"
+          className="absolute left-0 h-1 bg-aether-accent rounded-full group-hover:h-1.5 shadow-[0_0_8px_rgba(245,158,11,0.7)] pointer-events-none"
           style={{ width: `${progressPercent}%` }}
         />
 
-        {/* Playhead */}
+        {/* Caliper Playhead Needle */}
         <div
-          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 h-4 bg-aether-accent rounded-sm pointer-events-none group-hover:scale-110 transition-transform"
+          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none z-10 group-hover:scale-110 transition-transform"
           style={{ left: `${progressPercent}%` }}
         >
-          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-aether-accent" />
+          <div className="w-2.5 h-2.5 rounded-full bg-aether-accent shadow-[0_0_10px_rgba(245,158,11,0.9)] border border-aether-bg" />
+          <div className="w-[1.5px] h-3.5 bg-aether-accent" />
         </div>
 
         {/* Temporal Calibration Ticks */}
-        <div className="absolute left-0 bottom-0 w-[1px] h-1.5 bg-aether-border-interactive" />
-        <div className="absolute left-1/4 bottom-0 w-[1px] h-1.5 bg-aether-border-interactive" />
-        <div className="absolute left-2/4 bottom-0 w-[1px] h-1.5 bg-aether-border-interactive" />
-        <div className="absolute left-3/4 bottom-0 w-[1px] h-1.5 bg-aether-border-interactive" />
-        <div className="absolute right-0 bottom-0 w-[1px] h-1.5 bg-aether-border-interactive" />
+        <div className="absolute left-0 bottom-0.5 w-[1px] h-1.5 bg-aether-border-interactive pointer-events-none" />
+        <div className="absolute left-1/4 bottom-0.5 w-[1px] h-1.5 bg-aether-border-interactive pointer-events-none" />
+        <div className="absolute left-2/4 bottom-0.5 w-[1px] h-1.5 bg-aether-border-interactive pointer-events-none" />
+        <div className="absolute left-3/4 bottom-0.5 w-[1px] h-1.5 bg-aether-border-interactive pointer-events-none" />
+        <div className="absolute right-0 bottom-0.5 w-[1px] h-1.5 bg-aether-border-interactive pointer-events-none" />
       </div>
 
       {/* 3. Playback Controls & Speed Selector */}

@@ -2,7 +2,7 @@
 
 import React from "react";
 import dynamic from "next/dynamic";
-import type { GeoCoordinate, ProjectionType } from "@/types/spatial";
+import type { GeoCoordinate, PlaybackState, ProjectionType } from "@/types/spatial";
 
 // Client-only dynamic mount for Three.js WebGL canvas
 const GlobeCanvas = dynamic(
@@ -29,7 +29,16 @@ export interface SpatialViewportProps {
   zoom?: number;
   projection?: ProjectionType;
   resetOrientationTrigger?: number;
+  playbackState?: PlaybackState;
+  playbackSpeed?: number;
+  isTemperatureActive?: boolean;
+  temperatureOpacity?: number;
+  isPrecipitationActive?: boolean;
+  precipitationOpacity?: number;
+  progressPercent?: number;
+  monthOfYear?: number;
   onCoordinateChange?: (coord: GeoCoordinate) => void;
+  onZoomChange?: (zoom: number) => void;
   className?: string;
   children?: React.ReactNode;
 }
@@ -39,7 +48,16 @@ export function SpatialViewport({
   zoom = 1.0,
   projection = "globe-3d",
   resetOrientationTrigger = 0,
+  playbackState = "paused",
+  playbackSpeed = 1,
+  isTemperatureActive = true,
+  temperatureOpacity = 0.75,
+  isPrecipitationActive = false,
+  precipitationOpacity = 0.65,
+  progressPercent = 85,
+  monthOfYear = 1.0,
   onCoordinateChange,
+  onZoomChange,
   className = "",
   children,
 }: SpatialViewportProps) {
@@ -62,7 +80,16 @@ export function SpatialViewport({
           <GlobeCanvas
             zoom={zoom}
             resetOrientationTrigger={resetOrientationTrigger}
+            playbackState={playbackState}
+            playbackSpeed={playbackSpeed}
+            isTemperatureActive={isTemperatureActive}
+            temperatureOpacity={temperatureOpacity}
+            isPrecipitationActive={isPrecipitationActive}
+            precipitationOpacity={precipitationOpacity}
+            progressPercent={progressPercent}
+            monthOfYear={monthOfYear}
             onCoordinateChange={onCoordinateChange}
+            onZoomChange={onZoomChange}
           />
         )}
       </div>
