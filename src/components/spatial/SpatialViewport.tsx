@@ -16,14 +16,14 @@ export function SpatialViewport({
   className = "",
   children,
 }: SpatialViewportProps) {
-  // Format coordinate display in scientific notation
-  const latStr = `${Math.abs(center.latitude).toFixed(2)}° ${center.latitude >= 0 ? "N" : "S"}`;
-  const lonStr = `${Math.abs(center.longitude).toFixed(2)}° ${center.longitude >= 0 ? "E" : "W"}`;
-
   return (
     <main
       role="region"
-      aria-label="Planetary spatial viewport"
+      aria-label={`Planetary spatial viewport, projection: ${projection}, center: ${center.latitude}° lat, ${center.longitude}° lon, scale: ${zoom}x`}
+      data-projection={projection}
+      data-zoom={zoom}
+      data-lat={center.latitude}
+      data-lon={center.longitude}
       className={`relative w-full h-full overflow-hidden bg-aether-bg select-none ${className}`}
     >
       {/* 
@@ -47,21 +47,6 @@ export function SpatialViewport({
             </div>
           </div>
         )}
-      </div>
-
-      {/* Spatial Telemetry Readout Overlay (Bottom Left) */}
-      <div
-        className="absolute bottom-16 left-4 z-controls flex flex-col gap-1 font-mono text-[11px] text-aether-fg-muted pointer-events-none"
-        aria-live="polite"
-      >
-        <div className="flex items-center gap-2">
-          <span className="text-aether-fg-secondary">COORDINATES:</span>
-          <span>{latStr}, {lonStr}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-aether-fg-secondary">SCALE:</span>
-          <span>{zoom.toFixed(2)}× LOD: GLOBAL</span>
-        </div>
       </div>
     </main>
   );
