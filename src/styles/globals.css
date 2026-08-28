@@ -1,0 +1,59 @@
+@import './tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── BASE RESET & HTML ELEMENT STYLES ─────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--aether-bg);
+  color: var(--aether-fg);
+  font-family: var(--aether-font-body);
+  font-size: 16px;
+  line-height: var(--aether-lh-body);
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  background-color: var(--aether-bg);
+  color: var(--aether-fg);
+  font-family: var(--aether-font-body);
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ─── ACCESSIBILITY & FOCUS VISIBLE ────────────────────────────── */
+:focus-visible {
+  outline: var(--aether-border-w-focus) solid var(--aether-border-focus);
+  outline-offset: 2px;
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── SELECTION ─────────────────────────────────────────────────── */
+::selection {
+  background: var(--aether-accent-soft);
+  color: var(--aether-fg);
+}

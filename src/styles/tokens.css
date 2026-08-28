@@ -1,0 +1,261 @@
+/**
+ * AETHER DESIGN SYSTEM — CSS TOKENS
+ * Source of truth: design-reference/aether-design-system.html & docs/AETHER-DESIGN-SYSTEM.md
+ */
+
+:root {
+  /* ─── 1. COLOR TOKENS · UI ─────────────────────────────────────── */
+
+  /* Background */
+  --aether-bg: oklch(16% 0.018 260);
+  --aether-bg-secondary: oklch(14% 0.016 260);
+  --aether-bg-elevated: oklch(22% 0.022 260);
+  --aether-bg-map: oklch(16% 0.018 260);
+
+  /* Surface */
+  --aether-surface: oklch(20% 0.020 260);
+  --aether-surface-elevated: oklch(24% 0.022 260);
+  --aether-surface-hover: oklch(22% 0.022 260);
+  --aether-surface-active: oklch(26% 0.024 260);
+  --aether-surface-disabled: oklch(18% 0.018 260);
+
+  /* Foreground */
+  --aether-fg: oklch(92% 0.010 90);
+  --aether-fg-secondary: oklch(78% 0.012 90);
+  --aether-fg-muted: oklch(56% 0.016 260);
+  --aether-fg-disabled: oklch(38% 0.014 260);
+
+  /* Borders */
+  --aether-border: oklch(28% 0.018 260);
+  --aether-border-subtle: oklch(24% 0.016 260);
+  --aether-border-interactive: oklch(34% 0.020 260);
+  --aether-border-focus: oklch(72% 0.14 38);
+
+  /* Accent — Instrument Amber */
+  --aether-accent: oklch(72% 0.14 38);
+  --aether-accent-hover: oklch(76% 0.16 38);
+  --aether-accent-active: oklch(68% 0.16 38);
+  --aether-accent-selected: oklch(72% 0.14 38);
+  --aether-accent-soft: oklch(72% 0.14 38 / 14%);
+  --aether-accent-softer: oklch(72% 0.14 38 / 8%);
+
+  /* Semantic */
+  --aether-success: oklch(68% 0.12 145);
+  --aether-success-soft: oklch(68% 0.12 145 / 14%);
+  --aether-warning: oklch(78% 0.12 80);
+  --aether-warning-soft: oklch(78% 0.12 80 / 14%);
+  --aether-danger: oklch(65% 0.16 25);
+  --aether-danger-soft: oklch(65% 0.16 25 / 14%);
+  --aether-info: oklch(68% 0.08 240);
+  --aether-info-soft: oklch(68% 0.08 240 / 14%);
+
+  /* Derived */
+  --aether-fg-soft: oklch(92% 0.010 90 / 6%);
+
+  /* ─── 2. TYPOGRAPHY TOKENS ──────────────────────────────────────── */
+
+  /* Font families */
+  --aether-font-display: 'Iowan Old Style', 'Charter', Georgia, serif;
+  --aether-font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --aether-font-mono: ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+
+  /* Display / Geographic — Serif */
+  --aether-text-display-xl: clamp(40px, 5.5vw, 64px);
+  --aether-text-display-lg: clamp(32px, 4vw, 48px);
+  --aether-text-display-md: clamp(28px, 3.5vw, 40px);
+  --aether-text-display-sm: clamp(22px, 2.5vw, 28px);
+
+  /* Heading — Sans */
+  --aether-text-heading-lg: 20px;
+  --aether-text-heading-md: 17px;
+  --aether-text-heading-sm: 15px;
+
+  /* Body — Sans */
+  --aether-text-body-lg: 16px;
+  --aether-text-body-md: 15px;
+  --aether-text-body-sm: 14px;
+
+  /* Labels — Sans */
+  --aether-text-label-lg: 14px;
+  --aether-text-label-md: 13px;
+  --aether-text-label-sm: 12px;
+
+  /* Metadata — Mono */
+  --aether-text-meta-lg: 13px;
+  --aether-text-meta-md: 12px;
+  --aether-text-meta-sm: 11px;
+
+  /* Data values — Mono */
+  --aether-text-data-lg: 18px;
+  --aether-text-data-md: 15px;
+  --aether-text-data-sm: 13px;
+  --aether-text-data-xs: 11px;
+
+  /* Coordinates — Mono */
+  --aether-text-coord: 13px;
+
+  /* Line heights */
+  --aether-lh-display: 1.06;
+  --aether-lh-heading: 1.3;
+  --aether-lh-body: 1.6;
+  --aether-lh-tight: 1.2;
+  --aether-lh-data: 1.4;
+
+  /* Letter spacing */
+  --aether-ls-display: -0.02em;
+  --aether-ls-heading: -0.005em;
+  --aether-ls-body: 0;
+  --aether-ls-label: 0.04em;
+  --aether-ls-eyebrow: 0.08em;
+  --aether-ls-mono: 0.02em;
+
+  /* Font weights */
+  --aether-fw-regular: 400;
+  --aether-fw-medium: 500;
+  --aether-fw-semibold: 600;
+
+  /* ─── 3. SPACING TOKENS ─────────────────────────────────────────── */
+
+  /* Micro */
+  --aether-space-2xs: 2px;
+  --aether-space-xs: 4px;
+  --aether-space-sm: 8px;
+
+  /* Control */
+  --aether-space-md: 12px;
+  --aether-space-lg: 16px;
+
+  /* Panel */
+  --aether-space-xl: 20px;
+  --aether-space-2xl: 24px;
+  --aether-space-3xl: 28px;
+
+  /* Section */
+  --aether-space-4xl: 32px;
+  --aether-space-5xl: 48px;
+
+  /* Viewport */
+  --aether-space-6xl: 56px;
+  --aether-space-7xl: 88px;
+
+  /* Map safe areas */
+  --aether-map-safe-top: 48px;
+  --aether-map-safe-right: 0px;
+  --aether-map-safe-bottom: 56px;
+  --aether-map-safe-left: 0px;
+  --aether-map-center-zone: 70%;
+
+  /* ─── 4. GRID / LAYOUT TOKENS ───────────────────────────────────── */
+
+  --aether-viewport-max: 1920px;
+  --aether-panel-layer-w: 280px;
+  --aether-panel-inspect-w: 320px;
+  --aether-topbar-h: 48px;
+  --aether-timeline-h: 56px;
+  --aether-legend-w: 280px;
+  --aether-legend-h: 80px;
+
+  /* ─── 5. GEOMETRY TOKENS ────────────────────────────────────────── */
+
+  --aether-radius-sm: 4px;
+  --aether-radius-md: 6px;
+  --aether-radius-lg: 10px;
+  --aether-radius-xl: 16px;
+
+  /* ─── 6. BORDER TOKENS ──────────────────────────────────────────── */
+
+  --aether-border-w-hairline: 0.5px;
+  --aether-border-w-standard: 1px;
+  --aether-border-w-active: 1.5px;
+  --aether-border-w-focus: 2px;
+
+  /* ─── 7. SHADOW TOKENS ──────────────────────────────────────────── */
+
+  --aether-shadow-panel: 0 2px 8px oklch(0% 0 0 / 0.24);
+  --aether-shadow-tooltip: 0 1px 4px oklch(0% 0 0 / 0.32);
+
+  /* ─── 8. MOTION TOKENS ──────────────────────────────────────────── */
+
+  /* Durations */
+  --aether-dur-instant: 0ms;
+  --aether-dur-fast: 80ms;
+  --aether-dur-normal: 160ms;
+  --aether-dur-slow: 250ms;
+  --aether-dur-slower: 400ms;
+
+  /* Globe / spatial */
+  --aether-dur-globe-respond: 200ms;
+  --aether-dur-globe-decay: 600ms;
+  --aether-dur-zoom-respond: 120ms;
+  --aether-dur-zoom-settle: 300ms;
+
+  /* Easing */
+  --aether-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --aether-ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+  --aether-ease-decelerate: cubic-bezier(0, 0, 0.15, 1);
+  --aether-ease-inertial: cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  /* ─── 9. ICON TOKENS ────────────────────────────────────────────── */
+
+  --aether-icon-sm: 16px;
+  --aether-icon-md: 20px;
+  --aether-icon-lg: 24px;
+  --aether-icon-xl: 32px;
+  --aether-icon-stroke: 1.5px;
+
+  /* ─── 10. Z-INDEX ───────────────────────────────────────────────── */
+
+  --aether-z-globe: 0;
+  --aether-z-data: 10;
+  --aether-z-controls: 20;
+  --aether-z-panel: 30;
+  --aether-z-tooltip: 40;
+  --aether-z-topbar: 50;
+  --aether-z-modal: 60;
+
+  /* ─── 11. DATA VISUALIZATION SCALES ─────────────────────────────── */
+  /* Scientific encoding systems (Strictly separate from UI colors)   */
+
+  /* Temperature — diverging */
+  --aether-data-temp-cold: oklch(45% 0.12 260);
+  --aether-data-temp-below: oklch(60% 0.08 230);
+  --aether-data-temp-neutral: oklch(82% 0.04 140);
+  --aether-data-temp-above: oklch(78% 0.12 60);
+  --aether-data-temp-extreme: oklch(58% 0.18 30);
+
+  /* Temperature anomaly — diverging */
+  --aether-data-anomaly-neg: oklch(50% 0.14 260);
+  --aether-data-anomaly-neg-mild: oklch(65% 0.08 240);
+  --aether-data-anomaly-zero: oklch(85% 0.02 140);
+  --aether-data-anomaly-pos-mild: oklch(72% 0.12 60);
+  --aether-data-anomaly-pos: oklch(55% 0.18 30);
+
+  /* Precipitation — sequential */
+  --aether-data-precip-low: oklch(92% 0.01 260);
+  --aether-data-precip-normal: oklch(70% 0.08 240);
+  --aether-data-precip-high: oklch(52% 0.12 250);
+  --aether-data-precip-extreme: oklch(38% 0.16 260);
+
+  /* Wind — sequential */
+  --aether-data-wind-calm: oklch(82% 0.02 180);
+  --aether-data-wind-moderate: oklch(65% 0.08 200);
+  --aether-data-wind-strong: oklch(48% 0.12 220);
+  --aether-data-wind-extreme: oklch(35% 0.14 230);
+
+  /* Air quality — sequential (AQI breakpoints) */
+  --aether-data-aqi-good: oklch(72% 0.12 145);
+  --aether-data-aqi-moderate: oklch(80% 0.10 90);
+  --aether-data-aqi-unhealthy-sg: oklch(72% 0.14 55);
+  --aether-data-aqi-unhealthy: oklch(62% 0.16 30);
+  --aether-data-aqi-very-unhealthy: oklch(50% 0.16 340);
+  --aether-data-aqi-hazardous: oklch(40% 0.14 0);
+
+  /* No data / uncertainty */
+  --aether-data-nodata: transparent;
+  --aether-data-uncertainty: oklch(50% 0.01 260);
+  --aether-data-confidence-high: 1.0;
+  --aether-data-confidence-low: 0.5;
+
+  /* Night dimming */
+  --aether-data-night-dim: 0.6;
+}
