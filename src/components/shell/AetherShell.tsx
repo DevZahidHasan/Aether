@@ -58,9 +58,10 @@ export function AetherShell() {
 
   // Spatial State
   const [zoom, setZoom] = useState<number>(1.0);
+  const [resetTrigger, setResetTrigger] = useState<number>(0);
   const [coordinate, setCoordinate] = useState<GeoCoordinate>({
-    longitude: 2.1,
-    latitude: 45.2,
+    longitude: 0,
+    latitude: 20,
   });
 
   // Climate Layers State
@@ -99,6 +100,7 @@ export function AetherShell() {
   const handleResetOrientation = () => {
     setZoom(1.0);
     setCoordinate({ longitude: 0, latitude: 20 });
+    setResetTrigger((prev) => prev + 1);
   };
 
   // Layer Handlers
@@ -172,7 +174,12 @@ export function AetherShell() {
       />
 
       {/* Persistent Spatial Canvas Container */}
-      <SpatialViewport center={coordinate} zoom={zoom} />
+      <SpatialViewport
+        center={coordinate}
+        zoom={zoom}
+        resetOrientationTrigger={resetTrigger}
+        onCoordinateChange={setCoordinate}
+      />
 
       {/* Spatial Controls Stack (Bottom-Left above timeline) */}
       <div className="fixed bottom-[72px] left-4 z-controls">

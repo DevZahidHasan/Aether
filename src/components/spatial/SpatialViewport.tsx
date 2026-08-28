@@ -1,10 +1,35 @@
+"use client";
+
 import React from "react";
+import dynamic from "next/dynamic";
 import type { GeoCoordinate, ProjectionType } from "@/types/spatial";
+
+// Client-only dynamic mount for Three.js WebGL canvas
+const GlobeCanvas = dynamic(
+  () => import("./globe/GlobeCanvas").then((mod) => mod.GlobeCanvas),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
+        <div className="w-48 h-48 border border-dashed border-aether-accent/30 rounded-full animate-spin flex items-center justify-center" style={{ animationDuration: "10s" }}>
+          <div className="w-24 h-24 border border-aether-border rounded-full flex items-center justify-center">
+            <div className="w-2 h-2 rounded-full bg-aether-accent animate-pulse" />
+          </div>
+        </div>
+        <div className="mt-4 font-mono text-[11px] uppercase tracking-widest text-aether-fg-muted">
+          INITIALIZING SPATIAL ENGINE...
+        </div>
+      </div>
+    ),
+  }
+);
 
 export interface SpatialViewportProps {
   center?: GeoCoordinate;
   zoom?: number;
   projection?: ProjectionType;
+  resetOrientationTrigger?: number;
+  onCoordinateChange?: (coord: GeoCoordinate) => void;
   className?: string;
   children?: React.ReactNode;
 }
@@ -13,6 +38,8 @@ export function SpatialViewport({
   center = { longitude: 0, latitude: 20 },
   zoom = 1.0,
   projection = "globe-3d",
+  resetOrientationTrigger = 0,
+  onCoordinateChange,
   className = "",
   children,
 }: SpatialViewportProps) {
@@ -26,26 +53,17 @@ export function SpatialViewport({
       data-lon={center.longitude}
       className={`relative w-full h-full overflow-hidden bg-aether-bg select-none ${className}`}
     >
-      {/* 
-        WebGL Spatial Engine Mount Point (Phase 3)
-        Will mount Three.js / React Three Fiber Canvas here.
-      */}
+      {/* WebGL Spatial Engine Canvas Container */}
       <div
         id="aether-spatial-engine"
-        className="absolute inset-0 z-globe flex items-center justify-center pointer-events-auto"
+        className="absolute inset-0 z-globe"
       >
         {children || (
-          <div className="relative flex flex-col items-center justify-center pointer-events-none opacity-40">
-            {/* Minimal Instrument Reticle */}
-            <div className="w-64 h-64 border border-dashed border-aether-border rounded-full flex items-center justify-center">
-              <div className="w-32 h-32 border border-aether-border-subtle rounded-full flex items-center justify-center">
-                <div className="w-2 h-2 rounded-full bg-aether-accent opacity-60" />
-              </div>
-            </div>
-            <div className="mt-4 font-mono text-[11px] tracking-widest text-aether-fg-muted uppercase">
-              Spatial Engine [Mount: {projection}]
-            </div>
-          </div>
+          <GlobeCanvas
+            zoom={zoom}
+            resetOrientationTrigger={resetOrientationTrigger}
+            onCoordinateChange={onCoordinateChange}
+          />
         )}
       </div>
     </main>
