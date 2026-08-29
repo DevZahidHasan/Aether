@@ -7,28 +7,28 @@
   /* ─── 1. COLOR TOKENS · UI ─────────────────────────────────────── */
 
   /* Background */
-  --aether-bg: oklch(16% 0.018 260);
-  --aether-bg-secondary: oklch(14% 0.016 260);
-  --aether-bg-elevated: oklch(22% 0.022 260);
-  --aether-bg-map: oklch(16% 0.018 260);
+  --aether-bg: oklch(14% 0.003 260);
+  --aether-bg-secondary: oklch(12% 0.003 260);
+  --aether-bg-elevated: oklch(18% 0.004 260);
+  --aether-bg-map: oklch(14% 0.003 260);
 
-  /* Surface */
-  --aether-surface: oklch(20% 0.020 260);
-  --aether-surface-elevated: oklch(24% 0.022 260);
-  --aether-surface-hover: oklch(22% 0.022 260);
-  --aether-surface-active: oklch(26% 0.024 260);
-  --aether-surface-disabled: oklch(18% 0.018 260);
+  /* Surface — Google Dark Charcoal (#1e1f20, #28292a) */
+  --aether-surface: oklch(19% 0.004 260);
+  --aether-surface-elevated: oklch(24% 0.005 260);
+  --aether-surface-hover: oklch(23% 0.005 260);
+  --aether-surface-active: oklch(27% 0.006 260);
+  --aether-surface-disabled: oklch(16% 0.003 260);
 
   /* Foreground */
-  --aether-fg: oklch(92% 0.010 90);
-  --aether-fg-secondary: oklch(78% 0.012 90);
-  --aether-fg-muted: oklch(56% 0.016 260);
-  --aether-fg-disabled: oklch(38% 0.014 260);
+  --aether-fg: oklch(93% 0.005 90);
+  --aether-fg-secondary: oklch(78% 0.008 90);
+  --aether-fg-muted: oklch(58% 0.008 260);
+  --aether-fg-disabled: oklch(38% 0.008 260);
 
-  /* Borders */
-  --aether-border: oklch(28% 0.018 260);
-  --aether-border-subtle: oklch(24% 0.016 260);
-  --aether-border-interactive: oklch(34% 0.020 260);
+  /* Borders — Google Neutral Hairlines (#383a3d) */
+  --aether-border: oklch(28% 0.005 260);
+  --aether-border-subtle: oklch(23% 0.004 260);
+  --aether-border-interactive: oklch(34% 0.006 260);
   --aether-border-focus: oklch(72% 0.14 38);
 
   /* Accent — Instrument Amber */

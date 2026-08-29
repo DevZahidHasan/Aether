@@ -80,6 +80,13 @@ export function ClimateLegend({
         <span className="text-aether-data-anomaly-pos font-medium">+3°</span>
       </div>
 
+      {/* Semantic Color Meaning Labels */}
+      <div className="flex justify-between items-center text-[8.5px] font-mono tracking-tight -mt-1">
+        <span className="text-blue-400">COOLER</span>
+        <span className="text-slate-400">BASELINE</span>
+        <span className="text-red-400">EXTREME HEAT</span>
+      </div>
+
       {/* 4. Climatological Baseline Reference & Metric */}
       <div className="flex justify-between items-center text-[9px] font-mono text-aether-fg-muted pt-1 border-t border-aether-border-subtle">
         <span>1991–2020 BASELINE</span>

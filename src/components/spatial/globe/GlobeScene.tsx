@@ -5,6 +5,7 @@ import { OrbitControls } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { EarthSphere } from "./EarthSphere";
 import { TemperatureLayer } from "./TemperatureLayer";
+import { AirQualityLayer } from "./AirQualityLayer";
 import { PrecipitationLayer } from "./PrecipitationLayer";
 import { WindLayer } from "./WindLayer";
 import { AtmosphereGlow } from "./AtmosphereGlow";
@@ -22,6 +23,8 @@ export interface GlobeSceneProps {
   precipitationOpacity?: number;
   isWindActive?: boolean;
   windOpacity?: number;
+  isAirQualityActive?: boolean;
+  airQualityOpacity?: number;
   progressPercent?: number;
   monthOfYear?: number;
   onCoordinateChange?: (coord: GeoCoordinate) => void;
@@ -39,6 +42,8 @@ export function GlobeScene({
   precipitationOpacity = 0.65,
   isWindActive = false,
   windOpacity = 0.8,
+  isAirQualityActive = false,
+  airQualityOpacity = 0.7,
   progressPercent = 85,
   monthOfYear = 1.0,
   onCoordinateChange,
@@ -137,6 +142,13 @@ export function GlobeScene({
           active={isTemperatureActive}
           opacity={temperatureOpacity}
           progressPercent={progressPercent}
+        />
+        <AirQualityLayer
+          radius={2}
+          active={isAirQualityActive}
+          opacity={airQualityOpacity}
+          progressPercent={progressPercent}
+          monthOfYear={monthOfYear}
         />
         <PrecipitationLayer
           radius={2}

@@ -71,6 +71,14 @@ export function WindLegend({
         <span className="text-emerald-400 font-medium">35+</span>
       </div>
 
+      {/* Semantic Color Meaning Labels */}
+      <div className="flex justify-between items-center text-[8.5px] font-mono tracking-tight -mt-1">
+        <span className="text-teal-300">CALM</span>
+        <span className="text-sky-300">BREEZE</span>
+        <span className="text-blue-400">STRONG</span>
+        <span className="text-pink-400">JET STREAM</span>
+      </div>
+
       {/* 4. Climatological Reference & Unit */}
       <div className="flex justify-between items-center text-[9px] font-mono text-aether-fg-muted pt-1 border-t border-aether-border-subtle">
         <span>ERA5 REANALYSIS</span>

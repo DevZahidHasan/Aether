@@ -11,6 +11,7 @@ import { ScaleBar } from "@/components/controls/ScaleBar";
 import { ClimateLegend } from "@/components/data/ClimateLegend";
 import { PrecipitationLegend } from "@/components/data/PrecipitationLegend";
 import { WindLegend } from "@/components/data/WindLegend";
+import { AirQualityLegend } from "@/components/data/AirQualityLegend";
 import { TemporalRegion } from "@/components/temporal/TemporalRegion";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import type { ApplicationMode, GeoCoordinate, PlaybackState } from "@/types/spatial";
@@ -98,6 +99,11 @@ export function AetherShell() {
   const windLayer = layers.find((l) => l.id === "wind");
   const isWindActive = windLayer?.active ?? false;
   const windOpacity = windLayer?.opacity ?? 0.8;
+
+  // Active Air Quality Layer State
+  const aqiLayer = layers.find((l) => l.id === "air-quality");
+  const isAirQualityActive = aqiLayer?.active ?? false;
+  const airQualityOpacity = aqiLayer?.opacity ?? 0.7;
 
   // Global Keyboard Shortcuts
   useKeyboardShortcuts({
@@ -209,37 +215,46 @@ export function AetherShell() {
     if (!isTemperatureActive) return null;
     const lat = coordinate.latitude;
     const lon = coordinate.longitude;
-    const t = Math.max(0, Math.min(1, progressPercent / 100));
-    const globalTrend = 0.15 + (0.85 - 0.15) * Math.pow(t, 1.15);
-
     const lonRad = (lon * Math.PI) / 180;
-    const wave4 = Math.sin(lonRad * 4.0 + t * Math.PI) * 0.85;
-    const wave6 = Math.cos(lonRad * 6.0 - t * 2.0) * 0.45;
-    const jetFactor = Math.max(0, Math.min(1, (lat - 30) / 28)) * (1 - Math.max(0, Math.min(1, (lat - 76) / 12)));
-    const jetStreamWaves = (wave4 + wave6) * jetFactor;
+    const latRad = (lat * Math.PI) / 180;
+    const polarDamp = Math.cos(latRad);
+    const t = Math.max(0, Math.min(1, progressPercent / 100));
 
-    const arcticFactor = Math.max(0, Math.min(1, (lat - 52) / 23)) * (1 - Math.max(0, Math.min(1, (lat - 84) / 6)) * 0.35);
-    const arcticAnomaly = arcticFactor * ((0.6 + 1.8 * t) + jetStreamWaves * 0.75);
+    const globalBaseline = 0.18 + (0.85 - 0.18) * Math.pow(t, 1.15);
 
-    const eurasiaLat = Math.exp(-Math.pow((lat - 48) / 14, 2));
-    const eurasiaLon = Math.exp(-Math.pow((lon - 38) / 30, 2));
-    const eurasiaHeat = eurasiaLat * eurasiaLon * (0.4 + 1.9 * t);
+    const midLatEnvelope = Math.max(0, Math.min(1, (Math.abs(lat) - 22) / 16)) * (1 - Math.max(0, Math.min(1, (Math.abs(lat) - 62) / 16)));
+    const wave3 = Math.sin(lonRad * 3.0 + t * 2.2) * 0.70;
+    const wave4 = Math.cos(lonRad * 4.0 - t * 1.5 + 1.2) * 0.45;
+    const rossbyWaves = (wave3 + wave4) * midLatEnvelope * polarDamp * (0.5 + 0.6 * t);
 
-    const naLat = Math.exp(-Math.pow((lat - 45) / 15, 2));
-    const naLon = Math.exp(-Math.pow((lon + 98) / 28, 2));
-    const naHeat = naLat * naLon * (0.3 + 1.7 * t);
+    // North Atlantic cold hole
+    const dCold = Math.hypot((lon + 34.0) * 0.8, (lat - 52.0) * 1.2);
+    const coldHole = Math.exp(-Math.pow(dCold / 12.0, 2.0)) * -1.35;
 
-    const ensoLat = Math.exp(-Math.pow(lat / 9, 2));
-    const ensoLon = Math.exp(-Math.pow((lon + 130) / 40, 2));
-    const ensoWave = Math.sin(t * 18.8495 + 1.2) * 1.5;
-    const ensoAnomaly = ensoLat * ensoLon * ensoWave;
+    // Arctic Amplification
+    const arcticShelf = Math.max(0, Math.min(1, (lat - 64.0) / 12.0)) * (1 - Math.max(0, Math.min(1, (lat - 82.0) / 7.0)) * 0.4);
+    const arcticAnomaly = arcticShelf * (0.5 + 1.3 * t);
 
-    const coldLat = Math.exp(-Math.pow((lat - 54) / 9, 2));
-    const coldLon = Math.exp(-Math.pow((lon + 32) / 18, 2));
-    const southCold = Math.max(0, Math.min(1, (-lat - 45) / 23)) * 0.8;
-    const coldAnomaly = (coldLat * coldLon * 1.3 + southCold) * -1.0;
+    // Regional Heat Domes
+    const dUS = Math.hypot((lon + 115.0) * 0.9, (lat - 45.0) * 1.1);
+    const usHeat = Math.exp(-Math.pow(dUS / 14.0, 2.0)) * (0.3 + 1.1 * t);
 
-    const deltaT = globalTrend + arcticAnomaly + eurasiaHeat + naHeat + ensoAnomaly + coldAnomaly;
+    const dMed = Math.hypot((lon - 18.0) * 0.8, (lat - 38.0) * 1.1);
+    const medHeat = Math.exp(-Math.pow(dMed / 13.0, 2.0)) * (0.3 + 1.2 * t);
+
+    const dSiberia = Math.hypot((lon - 90.0) * 0.7, (lat - 58.0) * 1.1);
+    const siberiaHeat = Math.exp(-Math.pow(dSiberia / 16.0, 2.0)) * (0.3 + 1.2 * t);
+
+    // ENSO
+    const dEnso = Math.hypot((lon + 130.0) * 0.4, lat * 1.6);
+    const ensoCycle = Math.sin(t * 18.8495 + 1.2);
+    const ensoAnomaly = Math.exp(-Math.pow(dEnso / 18.0, 2.0)) * ensoCycle * 1.2;
+
+    // Southern Ocean
+    const southCold = Math.max(0, Math.min(1, (-lat - 48.0) / 14.0)) * (1 - Math.max(0, Math.min(1, (-lat - 74.0) / 12.0))) * -0.55;
+
+    const deltaT = globalBaseline + rossbyWaves + coldHole + arcticAnomaly + usHeat + medHeat + siberiaHeat + ensoAnomaly + southCold;
+
     const sign = deltaT >= 0 ? "+" : "";
     return `${sign}${deltaT.toFixed(1)}°C`;
   }, [isTemperatureActive, coordinate.latitude, coordinate.longitude, progressPercent]);
@@ -384,6 +399,113 @@ export function AetherShell() {
     return `${speed.toFixed(1)} m/s`;
   }, [isWindActive, coordinate.latitude, coordinate.longitude, progressPercent, monthOfYear]);
 
+  // Real-time Air Quality Index (AQI) readout at center coordinate
+  const centerAqiValue = React.useMemo(() => {
+    if (!isAirQualityActive) return null;
+    const lat = coordinate.latitude;
+    const lon = coordinate.longitude;
+    const t = Math.max(0, Math.min(1, progressPercent / 100));
+
+    const distToSegment = (px: number, py: number, ax: number, ay: number, bx: number, by: number) => {
+      const pax = px - ax;
+      const pay = py - ay;
+      const bax = bx - ax;
+      const bay = by - ay;
+      const h = Math.max(0, Math.min(1, (pax * bax + pay * bay) / (bax * bax + bay * bay)));
+      return Math.hypot(pax - bax * h, pay - bay * h);
+    };
+
+    const borealWinter = Math.max(0, Math.min(1, Math.cos(monthOfYear * 0.523598)));
+    const borealSummer = Math.max(0, Math.min(1, Math.sin((monthOfYear - 3.5) * 0.523598)));
+    const australDry = Math.max(0, Math.min(1, Math.sin((monthOfYear - 5.5) * 0.523598)));
+
+    const asianDecadalGrowth = 0.38 + (1.0 - 0.38) * Math.pow(t, 1.1);
+    const westernCleanAirFactor = 1.35 + (0.65 - 1.35) * t;
+    const wildfireClimateFactor = 0.45 + (1.25 - 0.45) * t;
+
+    const radialPlume = (px: number, py: number, cx: number, cy: number, r: number) => {
+      return Math.exp(-Math.pow(Math.hypot(px - cx, py - cy) / r, 2.0));
+    };
+
+    // Continental land ambient baseline (42 AQI across inhabited land)
+    const isEurasia = Math.max(0, Math.min(1, (lat - 12.0) / 20.0)) * (1 - Math.max(0, Math.min(1, (lat - 68.0) / 10.0))) *
+                      Math.max(0, Math.min(1, (lon + 12.0) / 27.0)) * (1 - Math.max(0, Math.min(1, (lon - 145.0) / 15.0)));
+    const isNorthAmerica = Math.max(0, Math.min(1, (lat - 15.0) / 15.0)) * (1 - Math.max(0, Math.min(1, (lat - 65.0) / 10.0))) *
+                           Math.max(0, Math.min(1, (lon + 130.0) / 15.0)) * (1 - Math.max(0, Math.min(1, (lon + 60.0) / 10.0)));
+    const isSouthAmerica = Math.max(0, Math.min(1, (lat + 52.0) / 12.0)) * (1 - Math.max(0, Math.min(1, (lat - 8.0) / 6.0))) *
+                           Math.max(0, Math.min(1, (lon + 82.0) / 12.0)) * (1 - Math.max(0, Math.min(1, (lon + 38.0) / 6.0)));
+    const isAfrica = Math.max(0, Math.min(1, (lat + 35.0) / 10.0)) * (1 - Math.max(0, Math.min(1, (lat - 32.0) / 6.0))) *
+                     Math.max(0, Math.min(1, (lon + 18.0) / 8.0)) * (1 - Math.max(0, Math.min(1, (lon - 45.0) / 7.0)));
+    const isAustralia = Math.max(0, Math.min(1, (lat + 42.0) / 10.0)) * (1 - Math.max(0, Math.min(1, (lat + 14.0) / 6.0))) *
+                        Math.max(0, Math.min(1, (lon - 112.0) / 8.0)) * (1 - Math.max(0, Math.min(1, (lon - 152.0) / 6.0)));
+    const isSoutheastAsia = Math.max(0, Math.min(1, (lat + 10.0) / 10.0)) * (1 - Math.max(0, Math.min(1, (lat - 22.0) / 4.0))) *
+                            Math.max(0, Math.min(1, (lon - 95.0) / 5.0)) * (1 - Math.max(0, Math.min(1, (lon - 130.0) / 8.0)));
+
+    const landAmbient = Math.max(isEurasia, Math.max(isNorthAmerica, Math.max(isSouthAmerica, Math.max(isAfrica, Math.max(isAustralia, isSoutheastAsia)))));
+    let aqi = 15.0 + landAmbient * 27.0; // 15 ocean, 42 continental land
+
+    // 1. South Asia
+    const dInd1 = distToSegment(lon, lat, 72.5, 32.0, 77.2, 28.6);
+    const dInd2 = distToSegment(lon, lat, 77.2, 28.6, 83.5, 25.5);
+    const dInd3 = distToSegment(lon, lat, 83.5, 25.5, 90.5, 23.5);
+    const dIndus = Math.min(dInd1, Math.min(dInd2, dInd3));
+    const indoHaze = Math.exp(-Math.pow(dIndus / 5.2, 2.0));
+    const indoIntensity = (120.0 + borealWinter * 230.0 - borealSummer * 25.0) * asianDecadalGrowth;
+    const mumbaiBelt = radialPlume(lon, lat, 73.0, 19.0, 6.5) * (70.0 + borealWinter * 65.0) * asianDecadalGrowth;
+    const southIndia = radialPlume(lon, lat, 78.5, 13.5, 7.0) * (45.0 + borealWinter * 45.0) * asianDecadalGrowth;
+    const pakistanIndus = radialPlume(lon, lat, 68.5, 27.5, 6.0) * (80.0 + borealWinter * 90.0) * asianDecadalGrowth;
+    aqi += (indoHaze * indoIntensity + mumbaiBelt + southIndia + pakistanIndus);
+
+    // 2. East & Southeast Asia
+    const dChina1 = distToSegment(lon, lat, 116.5, 39.5, 116.0, 33.5);
+    const chinaHaze = Math.exp(-Math.pow(dChina1 / 5.5, 2.0)) * (95.0 + borealWinter * 145.0) * asianDecadalGrowth;
+    const yrd = radialPlume(lon, lat, 120.5, 31.5, 5.0) * (75.0 + borealWinter * 80.0) * asianDecadalGrowth;
+    const prd = radialPlume(lon, lat, 113.5, 23.0, 4.5) * (65.0 + borealWinter * 60.0) * asianDecadalGrowth;
+    const sichuan = radialPlume(lon, lat, 104.5, 30.5, 4.5) * (80.0 + borealWinter * 90.0) * asianDecadalGrowth;
+    const seoul = radialPlume(lon, lat, 127.0, 37.5, 4.0) * (55.0 + borealWinter * 50.0);
+    const tokyoBelt = radialPlume(lon, lat, 138.0, 35.5, 5.0) * (40.0 + borealWinter * 35.0);
+    const bangkok = radialPlume(lon, lat, 100.5, 14.0, 5.5) * (65.0 + borealWinter * 60.0) * asianDecadalGrowth;
+    const hanoi = radialPlume(lon, lat, 105.8, 21.0, 4.5) * (75.0 + borealWinter * 70.0) * asianDecadalGrowth;
+    const javaBelt = radialPlume(lon, lat, 108.0, -7.0, 6.5) * (60.0 + australDry * 70.0) * asianDecadalGrowth;
+    aqi += (chinaHaze + yrd + prd + sichuan + seoul + tokyoBelt + bangkok + hanoi + javaBelt);
+
+    // 3. Middle East & Persian Gulf
+    const dMideast = distToSegment(lon, lat, 44.0, 33.0, 53.0, 24.5);
+    const mideastHaze = Math.exp(-Math.pow(dMideast / 6.0, 2.0)) * (90.0 + borealSummer * 65.0) * (0.70 + 0.50 * t);
+    const cairo = radialPlume(lon, lat, 31.2, 30.5, 4.0) * (85.0 + borealWinter * 55.0);
+    aqi += (mideastHaze + cairo);
+
+    // 4. Africa
+    const bodele = radialPlume(lon, lat, 17.0, 16.5, 6.5) * (140.0 + borealSummer * 85.0);
+    const westSahara = radialPlume(lon, lat, -8.0, 22.0, 7.5) * (125.0 + borealSummer * 75.0);
+    const dSal = distToSegment(lon, lat, -12.0, 18.0, -50.0, 14.0);
+    const salPlume = Math.exp(-Math.pow(dSal / 6.0, 2.0)) * (80.0 + borealSummer * 70.0);
+    const dGuin = distToSegment(lon, lat, -3.0, 5.5, 6.0, 6.5);
+    const guineaBelt = Math.exp(-Math.pow(dGuin / 4.5, 2.0)) * (75.0 + borealWinter * 55.0);
+    aqi += (bodele + westSahara + salPlume + guineaBelt);
+
+    // 5. Europe & Americas
+    const poValley = radialPlume(lon, lat, 10.5, 45.3, 3.8) * (70.0 + borealWinter * 65.0) * westernCleanAirFactor;
+    const centralEuro = radialPlume(lon, lat, 15.0, 51.0, 6.0) * (50.0 + borealWinter * 45.0) * westernCleanAirFactor;
+    const laBasin = radialPlume(lon, lat, -118.2, 34.0, 4.0) * (65.0 + borealSummer * 45.0) * westernCleanAirFactor;
+    const mexCity = radialPlume(lon, lat, -99.1, 19.4, 4.5) * (90.0 + borealWinter * 75.0);
+    const santiago = radialPlume(lon, lat, -70.6, -33.4, 3.8) * (80.0 + australDry * 65.0);
+    const saoPaulo = radialPlume(lon, lat, -46.6, -23.5, 4.5) * (60.0 + australDry * 50.0);
+    aqi += (poValley + centralEuro + laBasin + mexCity + santiago + saoPaulo);
+
+    // 6. Wildfires & Australia
+    const siberiaSmoke = radialPlume(lon, lat, 110.0, 60.0, 9.0) * borealSummer * 135.0 * wildfireClimateFactor;
+    const canadaSmoke = radialPlume(lon, lat, -118.0, 56.0, 8.5) * borealSummer * 125.0 * wildfireClimateFactor;
+    const amazonSmoke = radialPlume(lon, lat, -58.0, -9.0, 8.5) * australDry * 115.0 * wildfireClimateFactor;
+    const ozUrban = radialPlume(lon, lat, 148.0, -35.0, 5.0) * (35.0 + australDry * 45.0);
+    aqi += (siberiaSmoke + canadaSmoke + amazonSmoke + ozUrban);
+
+    const polarClean = Math.max(0, Math.min(1, (Math.abs(lat) - 68.0) / 12.0));
+    aqi = aqi * (1.0 - polarClean * 0.90) + 12.0 * (polarClean * 0.90);
+
+    return `${Math.round(aqi)} AQI`;
+  }, [isAirQualityActive, coordinate.latitude, coordinate.longitude, progressPercent, monthOfYear]);
+
   // Combined Active Layer Readouts for CoordinateDisplay
   const activeLayerReadouts = React.useMemo(() => {
     const readouts: { value: string; colorClass?: string }[] = [];
@@ -396,8 +518,11 @@ export function AetherShell() {
     if (centerWindValue) {
       readouts.push({ value: centerWindValue, colorClass: "text-emerald-400" });
     }
+    if (centerAqiValue) {
+      readouts.push({ value: centerAqiValue, colorClass: "text-amber-400" });
+    }
     return readouts;
-  }, [centerAnomalyValue, centerPrecipitationValue, centerWindValue]);
+  }, [centerAnomalyValue, centerPrecipitationValue, centerWindValue, centerAqiValue]);
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-aether-bg">
@@ -446,6 +571,8 @@ export function AetherShell() {
         precipitationOpacity={precipitationOpacity}
         isWindActive={isWindActive}
         windOpacity={windOpacity}
+        isAirQualityActive={isAirQualityActive}
+        airQualityOpacity={airQualityOpacity}
         progressPercent={progressPercent}
         monthOfYear={monthOfYear}
         onCoordinateChange={setCoordinate}
@@ -475,7 +602,7 @@ export function AetherShell() {
       </div>
 
       {/* Scientific Legends Stack (Top-Right below TopBar) */}
-      {(isTemperatureActive || isPrecipitationActive || isWindActive) && (
+      {(isTemperatureActive || isPrecipitationActive || isWindActive || isAirQualityActive) && (
         <div className="fixed top-14 right-4 z-controls flex flex-col gap-2.5 items-end animate-in fade-in duration-300">
           {isTemperatureActive && (
             <ClimateLegend
@@ -495,6 +622,13 @@ export function AetherShell() {
             <WindLegend
               active={isWindActive}
               opacity={windOpacity}
+              progressPercent={progressPercent}
+            />
+          )}
+          {isAirQualityActive && (
+            <AirQualityLegend
+              active={isAirQualityActive}
+              opacity={airQualityOpacity}
               progressPercent={progressPercent}
             />
           )}
