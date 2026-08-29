@@ -35,6 +35,8 @@ export interface SpatialViewportProps {
   temperatureOpacity?: number;
   isPrecipitationActive?: boolean;
   precipitationOpacity?: number;
+  isWindActive?: boolean;
+  windOpacity?: number;
   progressPercent?: number;
   monthOfYear?: number;
   onCoordinateChange?: (coord: GeoCoordinate) => void;
@@ -54,6 +56,8 @@ export function SpatialViewport({
   temperatureOpacity = 0.75,
   isPrecipitationActive = false,
   precipitationOpacity = 0.65,
+  isWindActive = false,
+  windOpacity = 0.8,
   progressPercent = 85,
   monthOfYear = 1.0,
   onCoordinateChange,
@@ -86,6 +90,8 @@ export function SpatialViewport({
             temperatureOpacity={temperatureOpacity}
             isPrecipitationActive={isPrecipitationActive}
             precipitationOpacity={precipitationOpacity}
+            isWindActive={isWindActive}
+            windOpacity={windOpacity}
             progressPercent={progressPercent}
             monthOfYear={monthOfYear}
             onCoordinateChange={onCoordinateChange}

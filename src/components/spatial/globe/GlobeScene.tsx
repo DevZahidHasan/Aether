@@ -6,6 +6,7 @@ import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { EarthSphere } from "./EarthSphere";
 import { TemperatureLayer } from "./TemperatureLayer";
 import { PrecipitationLayer } from "./PrecipitationLayer";
+import { WindLayer } from "./WindLayer";
 import { AtmosphereGlow } from "./AtmosphereGlow";
 import { GeographicGraticule } from "./GeographicGraticule";
 import type { GeoCoordinate, PlaybackState } from "@/types/spatial";
@@ -19,6 +20,8 @@ export interface GlobeSceneProps {
   temperatureOpacity?: number;
   isPrecipitationActive?: boolean;
   precipitationOpacity?: number;
+  isWindActive?: boolean;
+  windOpacity?: number;
   progressPercent?: number;
   monthOfYear?: number;
   onCoordinateChange?: (coord: GeoCoordinate) => void;
@@ -34,6 +37,8 @@ export function GlobeScene({
   temperatureOpacity = 0.75,
   isPrecipitationActive = false,
   precipitationOpacity = 0.65,
+  isWindActive = false,
+  windOpacity = 0.8,
   progressPercent = 85,
   monthOfYear = 1.0,
   onCoordinateChange,
@@ -137,6 +142,13 @@ export function GlobeScene({
           radius={2}
           active={isPrecipitationActive}
           opacity={precipitationOpacity}
+          progressPercent={progressPercent}
+          monthOfYear={monthOfYear}
+        />
+        <WindLayer
+          radius={2}
+          active={isWindActive}
+          opacity={windOpacity}
           progressPercent={progressPercent}
           monthOfYear={monthOfYear}
         />

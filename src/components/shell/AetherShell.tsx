@@ -10,6 +10,7 @@ import { CoordinateDisplay } from "@/components/controls/CoordinateDisplay";
 import { ScaleBar } from "@/components/controls/ScaleBar";
 import { ClimateLegend } from "@/components/data/ClimateLegend";
 import { PrecipitationLegend } from "@/components/data/PrecipitationLegend";
+import { WindLegend } from "@/components/data/WindLegend";
 import { TemporalRegion } from "@/components/temporal/TemporalRegion";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import type { ApplicationMode, GeoCoordinate, PlaybackState } from "@/types/spatial";
@@ -92,6 +93,11 @@ export function AetherShell() {
   const precipLayer = layers.find((l) => l.id === "precipitation");
   const isPrecipitationActive = precipLayer?.active ?? false;
   const precipitationOpacity = precipLayer?.opacity ?? 0.65;
+
+  // Active Wind Vectors Layer State
+  const windLayer = layers.find((l) => l.id === "wind");
+  const isWindActive = windLayer?.active ?? false;
+  const windOpacity = windLayer?.opacity ?? 0.8;
 
   // Global Keyboard Shortcuts
   useKeyboardShortcuts({
@@ -319,6 +325,65 @@ export function AetherShell() {
     return `${Math.max(0, total).toFixed(1)} mm/d`;
   }, [isPrecipitationActive, coordinate.latitude, coordinate.longitude, progressPercent, monthOfYear]);
 
+  // Real-time Wind Velocity readout at center coordinate (m/s)
+  const centerWindValue = React.useMemo(() => {
+    if (!isWindActive) return null;
+    const lat = coordinate.latitude;
+    const lon = coordinate.longitude;
+    const t = Math.max(0, Math.min(1, progressPercent / 100));
+
+    const borealSummer = Math.max(0, Math.min(1, Math.sin((monthOfYear - 3.5) * 0.523598)));
+    const australSummer = Math.max(0, Math.min(1, Math.sin((monthOfYear - 9.5) * 0.523598)));
+    const lonRad = (lon * Math.PI) / 180;
+
+    let u = 0.0;
+    let v = 0.0;
+
+    // A. Roaring Forties & Screaming Sixties (-40°S to -65°S)
+    const roaringFactor = Math.max(0, Math.min(1, (-lat - 34) / 8)) * (1 - Math.max(0, Math.min(1, (-lat - 62) / 8)));
+    const roaringSpeed = 16.0 + Math.sin(lonRad * 3.0 - t * 2.0) * 4.0 + australSummer * 4.0;
+    u += roaringFactor * roaringSpeed;
+    v += roaringFactor * Math.sin(lonRad * 4.0 + t) * 3.0;
+
+    // B. Tropical Trade Winds (5° to 28° N/S)
+    const neTrade = Math.max(0, Math.min(1, (lat - 4) / 6)) * (1 - Math.max(0, Math.min(1, (lat - 26) / 6)));
+    const seTrade = Math.max(0, Math.min(1, (-lat - 4) / 6)) * (1 - Math.max(0, Math.min(1, (-lat - 26) / 6)));
+    u -= (neTrade * 8.5 + seTrade * 9.0);
+    v -= (neTrade * 2.2);
+    v += (seTrade * 2.2);
+
+    // C. Northern Mid-Latitude Westerlies (35°N to 62°N: US, Europe, Asia)
+    const midLatNorth = Math.max(0, Math.min(1, (lat - 32) / 10)) * (1 - Math.max(0, Math.min(1, (lat - 60) / 8)));
+    const stormCycle = Math.sin(lonRad * 4.0 - t * 3.0);
+    u += midLatNorth * (11.0 + stormCycle * 4.5 + (1.0 - borealSummer) * 3.5);
+    v += midLatNorth * Math.cos(lonRad * 4.0 - t * 3.0) * 4.0;
+
+    // D. Polar Front Jet Stream
+    const jetLatitude = 46.0 + Math.sin(lonRad * 3.0 + t * 2.0) * 6.0;
+    const jetDist = Math.abs(lat - jetLatitude);
+    const jetStream = Math.max(0, (6.0 - jetDist) / 6.0) * (18.0 + (1.0 - borealSummer) * 8.0);
+    u += jetStream;
+
+    // E. Somali Jet & South Asian Monsoon
+    const dx = (lon - 62.0) * 0.8;
+    const dy = (lat - 14.0) * 1.2;
+    const somaliJet = Math.exp(-(dx * dx + dy * dy) / (2.0 * 16.0 * 16.0));
+    const monsoonStrength = Math.pow(borealSummer, 1.2);
+    u += somaliJet * (monsoonStrength * 14.0 - (1.0 - monsoonStrength) * 4.0);
+    v += somaliJet * (monsoonStrength * 9.0 - (1.0 - monsoonStrength) * 2.5);
+
+    // F. Subtropical Deserts damping
+    const dxSahara = (lon - 18.0) * 0.6;
+    const dySahara = (lat - 24.0) * 1.2;
+    const sahara = Math.exp(-(dxSahara * dxSahara + dySahara * dySahara) / (2.0 * 20.0 * 20.0));
+    const desertDamp = 1.0 - Math.min(0.65, sahara * 0.65);
+    u *= desertDamp;
+    v *= desertDamp;
+
+    const speed = Math.max(1.8, Math.hypot(u, v));
+    return `${speed.toFixed(1)} m/s`;
+  }, [isWindActive, coordinate.latitude, coordinate.longitude, progressPercent, monthOfYear]);
+
   // Combined Active Layer Readouts for CoordinateDisplay
   const activeLayerReadouts = React.useMemo(() => {
     const readouts: { value: string; colorClass?: string }[] = [];
@@ -328,8 +393,11 @@ export function AetherShell() {
     if (centerPrecipitationValue) {
       readouts.push({ value: centerPrecipitationValue, colorClass: "text-sky-400" });
     }
+    if (centerWindValue) {
+      readouts.push({ value: centerWindValue, colorClass: "text-emerald-400" });
+    }
     return readouts;
-  }, [centerAnomalyValue, centerPrecipitationValue]);
+  }, [centerAnomalyValue, centerPrecipitationValue, centerWindValue]);
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-aether-bg">
@@ -376,6 +444,8 @@ export function AetherShell() {
         temperatureOpacity={temperatureOpacity}
         isPrecipitationActive={isPrecipitationActive}
         precipitationOpacity={precipitationOpacity}
+        isWindActive={isWindActive}
+        windOpacity={windOpacity}
         progressPercent={progressPercent}
         monthOfYear={monthOfYear}
         onCoordinateChange={setCoordinate}
@@ -405,7 +475,7 @@ export function AetherShell() {
       </div>
 
       {/* Scientific Legends Stack (Top-Right below TopBar) */}
-      {(isTemperatureActive || isPrecipitationActive) && (
+      {(isTemperatureActive || isPrecipitationActive || isWindActive) && (
         <div className="fixed top-14 right-4 z-controls flex flex-col gap-2.5 items-end animate-in fade-in duration-300">
           {isTemperatureActive && (
             <ClimateLegend
@@ -418,6 +488,13 @@ export function AetherShell() {
             <PrecipitationLegend
               active={isPrecipitationActive}
               opacity={precipitationOpacity}
+              progressPercent={progressPercent}
+            />
+          )}
+          {isWindActive && (
+            <WindLegend
+              active={isWindActive}
+              opacity={windOpacity}
               progressPercent={progressPercent}
             />
           )}
