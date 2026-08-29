@@ -48,8 +48,29 @@ export function InspectionMarker({
     return { position: pos, quaternion: q };
   }, [latitude, longitude, radius]);
 
-  // Animated radar wave pulsation
+  const prefersReducedMotionRef = useRef<boolean>(false);
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    prefersReducedMotionRef.current = mq.matches;
+    const handler = (e: MediaQueryListEvent) => {
+      prefersReducedMotionRef.current = e.matches;
+    };
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  // Animated radar wave pulsation (static if prefers-reduced-motion)
   useFrame(({ clock }) => {
+    if (prefersReducedMotionRef.current) {
+      if (pulseRingRef.current) {
+        pulseRingRef.current.scale.set(1.0, 1.0, 1);
+        const mat = pulseRingRef.current.material as THREE.MeshBasicMaterial;
+        if (mat) mat.opacity = 0.4;
+      }
+      return;
+    }
+
     const elapsed = clock.getElapsedTime();
 
     // First pulse wave (period: 1.8s)

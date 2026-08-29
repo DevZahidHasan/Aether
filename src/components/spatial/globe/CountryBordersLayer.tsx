@@ -30,15 +30,22 @@ interface GeoJsonData {
  * Powered by public-domain Natural Earth vector geography.
  * Mounted at R x 1.0025 so boundaries sit perfectly above terrain and night lights.
  */
+let cachedBorderGeometry: THREE.BufferGeometry | null = null;
+
 export function CountryBordersLayer({
   radius = 2,
   color = "#ffffff",
   opacity = 0.32,
 }: CountryBordersLayerProps) {
-  const [geometry, setGeometry] = useState<THREE.BufferGeometry | null>(null);
+  const [geometry, setGeometry] = useState<THREE.BufferGeometry | null>(cachedBorderGeometry);
   const borderRadius = radius * 1.0025;
 
   useEffect(() => {
+    if (cachedBorderGeometry) {
+      setGeometry(cachedBorderGeometry);
+      return;
+    }
+
     let isMounted = true;
 
     fetch("/data/world-countries.json")
@@ -102,6 +109,7 @@ export function CountryBordersLayer({
           "position",
           new THREE.Float32BufferAttribute(linePoints, 3)
         );
+        cachedBorderGeometry = bg;
         setGeometry(bg);
       })
       .catch((err) => {

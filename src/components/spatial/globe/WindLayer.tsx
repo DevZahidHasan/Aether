@@ -240,18 +240,23 @@ export function WindLayer({
     });
   }, []);
 
+  const currentOpacityRef = useRef<number>(opacity);
+  const currentTimeRef = useRef<number>(progressPercent / 100);
+
   // Frame animation loop: animate uTime continuously for fluid flow and smooth on/off fade
   useFrame((state, delta) => {
     if (!materialRef.current) return;
 
     // Smooth exponential damping transition when layer toggles on/off
     const targetTransition = active ? 1.0 : 0.0;
-    transitionRef.current += (targetTransition - transitionRef.current) * Math.min(1.0, delta * 6.0);
+    transitionRef.current = THREE.MathUtils.damp(transitionRef.current, targetTransition, 8.0, delta);
+    currentOpacityRef.current = THREE.MathUtils.damp(currentOpacityRef.current, opacity, 9.0, delta);
+    currentTimeRef.current = THREE.MathUtils.damp(currentTimeRef.current, progressPercent / 100, 10.0, delta);
 
     // Update GPU uniforms safely
     const uniforms = materialRef.current.uniforms;
-    if (uniforms.uOpacity) uniforms.uOpacity.value = opacity;
-    if (uniforms.uTimeProgress) uniforms.uTimeProgress.value = progressPercent / 100;
+    if (uniforms.uOpacity) uniforms.uOpacity.value = currentOpacityRef.current;
+    if (uniforms.uTimeProgress) uniforms.uTimeProgress.value = currentTimeRef.current;
     if (uniforms.uTransition) uniforms.uTransition.value = transitionRef.current;
     if (uniforms.uMonth) uniforms.uMonth.value = monthOfYear;
     if (uniforms.uTime) uniforms.uTime.value = state.clock.getElapsedTime();

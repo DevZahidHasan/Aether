@@ -202,6 +202,9 @@ export function TemperatureLayer({
     });
   }, []);
 
+  const currentOpacityRef = useRef<number>(opacity);
+  const currentTimeRef = useRef<number>(progressPercent / 100);
+
   useFrame((_, delta) => {
     const targetTransition = active ? 1.0 : 0.0;
     currentTransitionRef.current = THREE.MathUtils.damp(
@@ -211,14 +214,28 @@ export function TemperatureLayer({
       delta
     );
 
+    currentOpacityRef.current = THREE.MathUtils.damp(
+      currentOpacityRef.current,
+      opacity,
+      9.0,
+      delta
+    );
+
+    currentTimeRef.current = THREE.MathUtils.damp(
+      currentTimeRef.current,
+      Math.max(0, Math.min(1, progressPercent / 100)),
+      10.0,
+      delta
+    );
+
     if (material.uniforms.uTransition) {
       material.uniforms.uTransition.value = currentTransitionRef.current;
     }
     if (material.uniforms.uOpacity) {
-      material.uniforms.uOpacity.value = opacity;
+      material.uniforms.uOpacity.value = currentOpacityRef.current;
     }
     if (material.uniforms.uTimeProgress) {
-      material.uniforms.uTimeProgress.value = Math.max(0, Math.min(1, progressPercent / 100));
+      material.uniforms.uTimeProgress.value = currentTimeRef.current;
     }
   });
 

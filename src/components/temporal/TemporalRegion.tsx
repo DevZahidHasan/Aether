@@ -80,19 +80,43 @@ export function TemporalRegion({
         </span>
       </div>
 
-      {/* 2. Timeline Track with Playhead & Ticks */}
+      {/* 2. Timeline Track with Playhead & Ticks (Fully Keyboard Operable) */}
       <div
         ref={trackRef}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
+        tabIndex={0}
         role="slider"
-        aria-label="Timeline scrubber"
+        aria-label="Timeline scrubber (1990 to 2026)"
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(progressPercent)}
-        className="flex-1 h-8 relative flex items-center cursor-pointer select-none group touch-none"
+        aria-valuetext={currentDate}
+        onKeyDown={(e) => {
+          const step1Year = 100 / 36;
+          if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+            e.preventDefault();
+            onSeek?.(Math.max(0, progressPercent - step1Year));
+          } else if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+            e.preventDefault();
+            onSeek?.(Math.min(100, progressPercent + step1Year));
+          } else if (e.key === "PageDown") {
+            e.preventDefault();
+            onSeek?.(Math.max(0, progressPercent - step1Year * 5));
+          } else if (e.key === "PageUp") {
+            e.preventDefault();
+            onSeek?.(Math.min(100, progressPercent + step1Year * 5));
+          } else if (e.key === "Home") {
+            e.preventDefault();
+            onSeek?.(0);
+          } else if (e.key === "End") {
+            e.preventDefault();
+            onSeek?.(100);
+          }
+        }}
+        className="flex-1 h-8 relative flex items-center cursor-pointer select-none group touch-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent focus-visible:ring-offset-2 focus-visible:ring-offset-aether-surface rounded"
       >
         {/* Track Background Rail */}
         <div className="absolute left-0 right-0 h-1 bg-aether-border/60 rounded-full group-hover:h-1.5 transition-[height]" />
@@ -127,7 +151,7 @@ export function TemporalRegion({
           type="button"
           aria-label="Step backward"
           onClick={onStepBack}
-          className="w-7 h-7 flex items-center justify-center rounded-sm bg-aether-surface-elevated hover:bg-aether-surface-hover border border-aether-border text-aether-fg-muted hover:text-aether-fg transition-colors cursor-pointer"
+          className="w-7 h-7 flex items-center justify-center rounded-sm bg-aether-surface-elevated hover:bg-aether-surface-hover border border-aether-border text-aether-fg-muted hover:text-aether-fg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent focus-visible:ring-offset-1 focus-visible:ring-offset-aether-surface"
         >
           <svg className="w-3 h-3 fill-current" viewBox="0 0 16 16">
             <polygon points="12,3 5,8 12,13" />
@@ -139,7 +163,7 @@ export function TemporalRegion({
           type="button"
           aria-label={playbackState === "playing" ? "Pause timeline (Shortcut: Space)" : "Play timeline (Shortcut: Space)"}
           onClick={onTogglePlayback}
-          className="w-8 h-8 flex items-center justify-center rounded-sm bg-aether-surface-elevated hover:bg-aether-surface-hover border border-aether-border text-aether-fg transition-colors cursor-pointer"
+          className="w-8 h-8 flex items-center justify-center rounded-sm bg-aether-surface-elevated hover:bg-aether-surface-hover border border-aether-border text-aether-fg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent focus-visible:ring-offset-1 focus-visible:ring-offset-aether-surface"
         >
           {playbackState === "playing" ? (
             <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 16 16">
@@ -158,7 +182,7 @@ export function TemporalRegion({
           type="button"
           aria-label="Step forward"
           onClick={onStepForward}
-          className="w-7 h-7 flex items-center justify-center rounded-sm bg-aether-surface-elevated hover:bg-aether-surface-hover border border-aether-border text-aether-fg-muted hover:text-aether-fg transition-colors cursor-pointer"
+          className="w-7 h-7 flex items-center justify-center rounded-sm bg-aether-surface-elevated hover:bg-aether-surface-hover border border-aether-border text-aether-fg-muted hover:text-aether-fg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent focus-visible:ring-offset-1 focus-visible:ring-offset-aether-surface"
         >
           <svg className="w-3 h-3 fill-current" viewBox="0 0 16 16">
             <polygon points="4,3 11,8 4,13" />
@@ -170,7 +194,7 @@ export function TemporalRegion({
           type="button"
           aria-label={`Playback speed: ${playbackSpeed}x. Click to change`}
           onClick={onChangeSpeed}
-          className="h-7 px-2 font-mono text-[10px] text-aether-fg-muted hover:text-aether-fg bg-aether-bg-secondary border border-aether-border rounded-sm transition-colors cursor-pointer ml-1"
+          className="h-7 px-2 font-mono text-[10px] text-aether-fg-muted hover:text-aether-fg bg-aether-bg-secondary border border-aether-border rounded-sm transition-colors cursor-pointer ml-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent focus-visible:ring-offset-1 focus-visible:ring-offset-aether-surface"
         >
           {playbackSpeed}×
         </button>

@@ -61,6 +61,11 @@ export function InspectionPanel({
       aria-label="Geographic Point Inspection Panel"
       className="absolute top-16 right-4 z-40 w-96 max-w-[calc(100vw-2rem)] max-h-[calc(100vh-8.5rem)] overflow-y-auto bg-[#1e1f20] border border-[#383a3d] rounded-2xl shadow-2xl shadow-black/90 text-white flex flex-col p-5 font-sans animate-in fade-in slide-in-from-right-4 duration-200"
     >
+      {/* Screen Reader Live Telemetry Announcement */}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {`Inspected location: ${data.locationName}, ${data.region}. Coordinates: ${Math.abs(data.latitude).toFixed(2)} degrees ${data.latitude >= 0 ? "North" : "South"}, ${Math.abs(data.longitude).toFixed(2)} degrees ${data.longitude >= 0 ? "East" : "West"}. Temperature Anomaly: ${data.tempAnomaly > 0 ? "+" : ""}${data.tempAnomaly.toFixed(2)} degrees Celsius. Precipitation: ${data.precipRate.toFixed(1)} millimeters per day, ${data.precipCategory}. Wind: ${data.windSpeed.toFixed(1)} meters per second, direction ${data.windDirection}. Air Quality Index: ${data.aqi}, ${data.aqiCategory}.`}
+      </div>
+
       {/* 1. Header: Location Name & Circular Close Button */}
       <div className="flex items-start justify-between gap-3 pb-3 border-b border-[#383a3d]">
         <div>
@@ -80,7 +85,7 @@ export function InspectionPanel({
           type="button"
           onClick={onClose}
           aria-label="Close inspection panel"
-          className="w-8 h-8 rounded-full bg-[#2f3032] hover:bg-[#383a3d] text-[#c4c7c5] hover:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
+          className="w-8 h-8 rounded-full bg-[#2f3032] hover:bg-[#383a3d] text-[#c4c7c5] hover:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="18" y1="6" x2="6" y2="18" />
@@ -106,7 +111,8 @@ export function InspectionPanel({
         <button
           type="button"
           onClick={handleCopyCoord}
-          className="text-[11px] text-amber-400 hover:text-amber-300 font-sans font-medium transition-colors cursor-pointer"
+          aria-label="Copy coordinates to clipboard"
+          className="text-[11px] text-amber-400 hover:text-amber-300 font-sans font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded px-1"
         >
           {copied ? "Copied!" : "Copy"}
         </button>
@@ -191,18 +197,18 @@ export function InspectionPanel({
             <button
               type="button"
               onClick={() => setActiveTab("temp")}
-              className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors cursor-pointer ${
+              className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                 activeTab === "temp"
                   ? "bg-amber-500/20 text-amber-400 font-semibold"
                   : "text-[#9aa0a6] hover:text-white"
               }`}
             >
-              TEMP
+              Temp
             </button>
             <button
               type="button"
               onClick={() => setActiveTab("aqi")}
-              className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors cursor-pointer ${
+              className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
                 activeTab === "aqi"
                   ? "bg-amber-500/20 text-amber-400 font-semibold"
                   : "text-[#9aa0a6] hover:text-white"
@@ -268,7 +274,7 @@ export function InspectionPanel({
           <button
             type="button"
             onClick={() => onFlyTo(data.latitude, data.longitude)}
-            className="flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-medium cursor-pointer transition-colors"
+            className="flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded px-1"
           >
             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />

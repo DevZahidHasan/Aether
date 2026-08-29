@@ -82,6 +82,8 @@ export function LayerPanel({
 
   return (
     <aside
+      id="layer-panel"
+      role="region"
       aria-label="Climate data layers"
       className="fixed top-14 left-4 z-panel w-[340px] max-h-[calc(100vh-140px)] bg-[#1e1f20] border border-[#3c4043] rounded-2xl shadow-2xl shadow-black/80 flex flex-col select-none overflow-hidden animate-in fade-in slide-in-from-left-2 duration-200"
     >
@@ -93,7 +95,7 @@ export function LayerPanel({
             type="button"
             aria-label="Close layers panel"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-[#2f3032] hover:bg-[#3c3d40] text-[#e8eaed] hover:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
+            className="w-8 h-8 rounded-full bg-[#2f3032] hover:bg-[#3c3d40] text-[#e8eaed] hover:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -148,7 +150,7 @@ export function LayerPanel({
                   aria-checked={layer.active}
                   aria-label={`Toggle ${layer.name}`}
                   onClick={() => onToggleLayer(layer.id)}
-                  className={`w-9 h-5 rounded-full p-0.5 transition-colors cursor-pointer shrink-0 ${
+                  className={`w-9 h-5 rounded-full p-0.5 transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent focus-visible:ring-offset-2 focus-visible:ring-offset-[#1e1f20] ${
                     layer.active ? "bg-aether-accent" : "bg-[#3c4043] hover:bg-[#484c50]"
                   }`}
                 >
@@ -197,10 +199,14 @@ export function LayerPanel({
                       max="1.0"
                       step="0.05"
                       value={layer.opacity}
+                      aria-valuemin={10}
+                      aria-valuemax={100}
+                      aria-valuenow={Math.round(layer.opacity * 100)}
+                      aria-valuetext={`${Math.round(layer.opacity * 100)} percent`}
                       onChange={(e) =>
                         onChangeOpacity(layer.id, parseFloat(e.target.value))
                       }
-                      className="w-24 accent-aether-accent h-1 bg-[#3c4043] rounded cursor-pointer"
+                      className="w-24 accent-aether-accent h-1 bg-[#3c4043] rounded cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent"
                       aria-label={`${layer.name} opacity`}
                     />
                     <span className="w-7 text-right text-[#e8eaed] font-medium">

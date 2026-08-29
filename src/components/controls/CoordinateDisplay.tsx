@@ -8,7 +8,7 @@ export interface CoordinateDisplayProps {
   className?: string;
 }
 
-export function CoordinateDisplay({
+export const CoordinateDisplay = React.memo(function CoordinateDisplay({
   coordinate = { longitude: 0, latitude: 20 },
   activeLayerValue,
   activeLayerReadouts,
@@ -42,4 +42,4 @@ export function CoordinateDisplay({
       ) : null}
     </div>
   );
-}
+});

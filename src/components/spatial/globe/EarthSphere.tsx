@@ -9,6 +9,9 @@ export interface EarthSphereProps {
   radius?: number;
 }
 
+const EARTH_NORMAL_SCALE = new THREE.Vector2(0.8, 0.8);
+const EARTH_EMISSIVE_COLOR = new THREE.Color("#ffd480");
+
 export function EarthSphere({ radius = 2 }: EarthSphereProps) {
   const cloudsRef = useRef<THREE.Mesh>(null);
 
@@ -41,13 +44,13 @@ export function EarthSphere({ radius = 2 }: EarthSphereProps) {
         <meshStandardMaterial
           map={textures.map}
           normalMap={textures.normalMap}
-          normalScale={new THREE.Vector2(0.8, 0.8)}
+          normalScale={EARTH_NORMAL_SCALE}
           roughnessMap={textures.roughnessMap}
           roughness={0.65}
           metalnessMap={textures.roughnessMap}
           metalness={0.15}
           emissiveMap={textures.emissiveMap}
-          emissive={new THREE.Color("#ffd480")}
+          emissive={EARTH_EMISSIVE_COLOR}
           emissiveIntensity={0.5}
         />
       </mesh>

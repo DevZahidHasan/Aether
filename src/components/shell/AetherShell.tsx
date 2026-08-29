@@ -564,15 +564,32 @@ export function AetherShell() {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-aether-bg">
+      {/* Screen Reader Skip Link */}
+      <a
+        href="#main-controls"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-modal focus:px-3 focus:py-1.5 focus:bg-aether-accent focus:text-black font-mono text-xs font-semibold rounded shadow-lg"
+      >
+        Skip to Controls
+      </a>
+
+      {/* Screen Reader Mode Change Live Announcement */}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {mode === "inspect"
+          ? "Inspect mode active. Click any location on the globe to inspect climate measurements."
+          : "Explore mode active. Drag to rotate the planet or use zoom controls."}
+      </div>
+
       {/* Pinned Top Navigation Bar (48px) */}
-      <TopBar
-        currentMode={mode}
-        onModeChange={handleModeChange}
-        isLayerPanelOpen={isLayerPanelOpen}
-        onToggleLayerPanel={() => setIsLayerPanelOpen((prev) => !prev)}
-        onOpenSearch={() => setIsSearchOpen(true)}
-        activeLayerName={activeLayerName}
-      />
+      <div id="main-controls">
+        <TopBar
+          currentMode={mode}
+          onModeChange={handleModeChange}
+          isLayerPanelOpen={isLayerPanelOpen}
+          onToggleLayerPanel={() => setIsLayerPanelOpen((prev) => !prev)}
+          onOpenSearch={() => setIsSearchOpen(true)}
+          activeLayerName={activeLayerName}
+        />
+      </div>
 
       {/* Slide-in Layer Panel (Left) */}
       <LayerPanel
@@ -588,10 +605,45 @@ export function AetherShell() {
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
         onSelectLocation={(query) => {
-          if (query.toLowerCase().includes("arctic")) {
-            setCoordinate({ longitude: 0, latitude: 75.0 });
+          const q = query.trim().toLowerCase();
+          const coordMatch = q.match(/([-+]?\d+(?:\.\d+)?)\s*(?:°?\s*([ns]))?[\s,]+([-+]?\d+(?:\.\d+)?)\s*(?:°?\s*([ew]))?/i);
+          if (coordMatch) {
+            let lat = parseFloat(coordMatch[1] ?? "0");
+            let lon = parseFloat(coordMatch[3] ?? "0");
+            if (coordMatch[2]?.toLowerCase() === "s") lat = -Math.abs(lat);
+            if (coordMatch[4]?.toLowerCase() === "w") lon = -Math.abs(lon);
+            setFlyToCoord({ lat, lon, timestamp: Date.now() });
+            return;
+          }
+
+          if (q.includes("dhaka") || q.includes("bangladesh")) {
+            setFlyToCoord({ lat: 23.81, lon: 90.41, timestamp: Date.now() });
+          } else if (q.includes("chattogram") || q.includes("chittagong")) {
+            setFlyToCoord({ lat: 22.35, lon: 91.78, timestamp: Date.now() });
+          } else if (q.includes("sylhet")) {
+            setFlyToCoord({ lat: 24.89, lon: 91.87, timestamp: Date.now() });
+          } else if (q.includes("delhi") || q.includes("india")) {
+            setFlyToCoord({ lat: 28.61, lon: 77.21, timestamp: Date.now() });
+          } else if (q.includes("arctic") || q.includes("north pole")) {
+            setFlyToCoord({ lat: 78.0, lon: 0.0, timestamp: Date.now() });
+          } else if (q.includes("antarctica") || q.includes("south pole")) {
+            setFlyToCoord({ lat: -78.0, lon: 0.0, timestamp: Date.now() });
+          } else if (q.includes("nicaragua") || q.includes("managua")) {
+            setFlyToCoord({ lat: 12.92, lon: -85.91, timestamp: Date.now() });
+          } else if (q.includes("amazon") || q.includes("manaus") || q.includes("brazil")) {
+            setFlyToCoord({ lat: -3.12, lon: -60.02, timestamp: Date.now() });
+          } else if (q.includes("tokyo") || q.includes("japan")) {
+            setFlyToCoord({ lat: 35.68, lon: 139.69, timestamp: Date.now() });
+          } else if (q.includes("london") || q.includes("uk")) {
+            setFlyToCoord({ lat: 51.51, lon: -0.13, timestamp: Date.now() });
+          } else if (q.includes("paris") || q.includes("france")) {
+            setFlyToCoord({ lat: 48.86, lon: 2.35, timestamp: Date.now() });
+          } else if (q.includes("new york") || q.includes("usa") || q.includes("america")) {
+            setFlyToCoord({ lat: 40.71, lon: -74.01, timestamp: Date.now() });
+          } else if (q.includes("cairo") || q.includes("egypt") || q.includes("sahara")) {
+            setFlyToCoord({ lat: 25.0, lon: 20.0, timestamp: Date.now() });
           } else {
-            setCoordinate({ longitude: 2.1, latitude: 45.2 });
+            setFlyToCoord({ lat: 35.0, lon: 15.0, timestamp: Date.now() });
           }
         }}
       />

@@ -5,7 +5,7 @@ export interface ScaleBarProps {
   className?: string;
 }
 
-export function ScaleBar({ zoom = 1.0, className = "" }: ScaleBarProps) {
+export const ScaleBar = React.memo(function ScaleBar({ zoom = 1.0, className = "" }: ScaleBarProps) {
   // Convert zoom factor into calibrated cartographic distance in kilometers
   const effectiveZoom = Math.max(0.4, zoom);
   const rawKm = 5000 / effectiveZoom;
@@ -47,4 +47,4 @@ export function ScaleBar({ zoom = 1.0, className = "" }: ScaleBarProps) {
       </span>
     </div>
   );
-}
+});

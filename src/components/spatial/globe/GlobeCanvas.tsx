@@ -72,6 +72,8 @@ export function GlobeCanvas({
       <Suspense fallback={<GlobeLoadingFallback />}>
         <Canvas
           camera={{ position: [0, 0, 4.8], fov: 45 }}
+          dpr={[1, 2]}
+          performance={{ min: 0.6 }}
           gl={{
             antialias: true,
             powerPreference: "high-performance",
