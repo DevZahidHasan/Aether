@@ -13,6 +13,8 @@ import { PrecipitationLegend } from "@/components/data/PrecipitationLegend";
 import { WindLegend } from "@/components/data/WindLegend";
 import { AirQualityLegend } from "@/components/data/AirQualityLegend";
 import { TemporalRegion } from "@/components/temporal/TemporalRegion";
+import { InspectionPanel } from "@/components/spatial/InspectionPanel";
+import { computeLocationTelemetry } from "@/lib/spatial/locationIntelligence";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import type { ApplicationMode, GeoCoordinate, PlaybackState } from "@/types/spatial";
 import type { ClimateLayerId } from "@/types/climate";
@@ -68,6 +70,10 @@ export function AetherShell() {
     latitude: 20,
   });
 
+  // Spatial Inspection State (Phase 7)
+  const [inspectedPoint, setInspectedPoint] = useState<{ lat: number; lon: number } | null>(null);
+  const [flyToCoord, setFlyToCoord] = useState<{ lat: number; lon: number; timestamp: number } | null>(null);
+
   // Climate Layers State
   const [layers, setLayers] = useState<LayerItemConfig[]>(INITIAL_LAYERS);
 
@@ -109,10 +115,18 @@ export function AetherShell() {
   useKeyboardShortcuts({
     onToggleSearch: () => setIsSearchOpen((prev) => !prev),
     onToggleInspect: () =>
-      setMode((prev) => (prev === "inspect" ? "explore" : "inspect")),
+      setMode((prev) => {
+        const next = prev === "inspect" ? "explore" : "inspect";
+        if (next === "explore") {
+          setInspectedPoint(null);
+        }
+        return next;
+      }),
     onCloseOverlays: () => {
       setIsSearchOpen(false);
       setIsLayerPanelOpen(false);
+      setInspectedPoint(null);
+      setMode("explore");
     },
     onTogglePlayback: () =>
       setPlayback((prev) => (prev === "playing" ? "paused" : "playing")),
@@ -524,12 +538,36 @@ export function AetherShell() {
     return readouts;
   }, [centerAnomalyValue, centerPrecipitationValue, centerWindValue, centerAqiValue]);
 
+  // Interrogated Point Climate Measurement (Phase 7)
+  const inspectedMeasurement = React.useMemo(() => {
+    if (!inspectedPoint) return null;
+    return computeLocationTelemetry(
+      inspectedPoint.lat,
+      inspectedPoint.lon,
+      progressPercent,
+      monthOfYear
+    );
+  }, [inspectedPoint, progressPercent, monthOfYear]);
+
+  const handleModeChange = React.useCallback((newMode: ApplicationMode) => {
+    setMode(newMode);
+    if (newMode === "explore") {
+      setInspectedPoint(null);
+    }
+  }, []);
+
+  const handleSelectPoint = React.useCallback((point: { lat: number; lon: number }) => {
+    // Only register selection if inspect mode is actively engaged
+    if (mode !== "inspect") return;
+    setInspectedPoint(point);
+  }, [mode]);
+
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-aether-bg">
       {/* Pinned Top Navigation Bar (48px) */}
       <TopBar
         currentMode={mode}
-        onModeChange={setMode}
+        onModeChange={handleModeChange}
         isLayerPanelOpen={isLayerPanelOpen}
         onToggleLayerPanel={() => setIsLayerPanelOpen((prev) => !prev)}
         onOpenSearch={() => setIsSearchOpen(true)}
@@ -575,6 +613,10 @@ export function AetherShell() {
         airQualityOpacity={airQualityOpacity}
         progressPercent={progressPercent}
         monthOfYear={monthOfYear}
+        mode={mode}
+        inspectedPoint={inspectedPoint}
+        flyToCoord={flyToCoord}
+        onSelectPoint={handleSelectPoint}
         onCoordinateChange={setCoordinate}
         onZoomChange={setZoom}
       />
@@ -601,8 +643,22 @@ export function AetherShell() {
         <ScaleBar zoom={zoom} />
       </div>
 
-      {/* Scientific Legends Stack (Top-Right below TopBar) */}
-      {(isTemperatureActive || isPrecipitationActive || isWindActive || isAirQualityActive) && (
+      {/* Interrogated Point Inspection Panel (Phase 7 - Right Side) */}
+      {inspectedMeasurement && (
+        <InspectionPanel
+          data={inspectedMeasurement}
+          timelineYear={currentYear}
+          timelineMonth={currentMonthName}
+          onClose={() => {
+            setInspectedPoint(null);
+            setMode("explore");
+          }}
+          onFlyTo={(lat, lon) => setFlyToCoord({ lat, lon, timestamp: Date.now() })}
+        />
+      )}
+
+      {/* Scientific Legends Stack (Top-Right below TopBar, hidden when InspectionPanel is open) */}
+      {!inspectedMeasurement && (isTemperatureActive || isPrecipitationActive || isWindActive || isAirQualityActive) && (
         <div className="fixed top-14 right-4 z-controls flex flex-col gap-2.5 items-end animate-in fade-in duration-300">
           {isTemperatureActive && (
             <ClimateLegend

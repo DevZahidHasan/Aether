@@ -41,6 +41,10 @@ export interface SpatialViewportProps {
   airQualityOpacity?: number;
   progressPercent?: number;
   monthOfYear?: number;
+  mode?: "explore" | "inspect";
+  inspectedPoint?: { lat: number; lon: number } | null;
+  flyToCoord?: { lat: number; lon: number; timestamp: number } | null;
+  onSelectPoint?: (point: { lat: number; lon: number }) => void;
   onCoordinateChange?: (coord: GeoCoordinate) => void;
   onZoomChange?: (zoom: number) => void;
   className?: string;
@@ -64,6 +68,10 @@ export function SpatialViewport({
   airQualityOpacity = 0.7,
   progressPercent = 85,
   monthOfYear = 1.0,
+  mode = "explore",
+  inspectedPoint = null,
+  flyToCoord = null,
+  onSelectPoint,
   onCoordinateChange,
   onZoomChange,
   className = "",
@@ -100,6 +108,10 @@ export function SpatialViewport({
             airQualityOpacity={airQualityOpacity}
             progressPercent={progressPercent}
             monthOfYear={monthOfYear}
+            mode={mode}
+            inspectedPoint={inspectedPoint}
+            flyToCoord={flyToCoord}
+            onSelectPoint={onSelectPoint}
             onCoordinateChange={onCoordinateChange}
             onZoomChange={onZoomChange}
           />

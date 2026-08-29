@@ -20,6 +20,10 @@ export interface GlobeCanvasProps {
   airQualityOpacity?: number;
   progressPercent?: number;
   monthOfYear?: number;
+  mode?: "explore" | "inspect";
+  inspectedPoint?: { lat: number; lon: number } | null;
+  flyToCoord?: { lat: number; lon: number; timestamp: number } | null;
+  onSelectPoint?: (point: { lat: number; lon: number }) => void;
   onCoordinateChange?: (coord: GeoCoordinate) => void;
   onZoomChange?: (zoom: number) => void;
 }
@@ -54,9 +58,15 @@ export function GlobeCanvas({
   airQualityOpacity = 0.7,
   progressPercent = 85,
   monthOfYear = 1.0,
+  mode = "explore",
+  inspectedPoint = null,
+  flyToCoord = null,
+  onSelectPoint,
   onCoordinateChange,
   onZoomChange,
 }: GlobeCanvasProps) {
+  const cursorStyle = mode === "inspect" ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing";
+
   return (
     <div className="relative w-full h-full">
       <Suspense fallback={<GlobeLoadingFallback />}>
@@ -67,7 +77,7 @@ export function GlobeCanvas({
             powerPreference: "high-performance",
             alpha: true,
           }}
-          className="w-full h-full cursor-grab active:cursor-grabbing"
+          className={`w-full h-full ${cursorStyle}`}
         >
           <GlobeScene
             zoom={zoom}
@@ -84,6 +94,10 @@ export function GlobeCanvas({
             airQualityOpacity={airQualityOpacity}
             progressPercent={progressPercent}
             monthOfYear={monthOfYear}
+            mode={mode}
+            inspectedPoint={inspectedPoint}
+            flyToCoord={flyToCoord}
+            onSelectPoint={onSelectPoint}
             onCoordinateChange={onCoordinateChange}
             onZoomChange={onZoomChange}
           />

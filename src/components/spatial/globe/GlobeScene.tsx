@@ -10,6 +10,8 @@ import { PrecipitationLayer } from "./PrecipitationLayer";
 import { WindLayer } from "./WindLayer";
 import { AtmosphereGlow } from "./AtmosphereGlow";
 import { GeographicGraticule } from "./GeographicGraticule";
+import { CountryBordersLayer } from "./CountryBordersLayer";
+import { InspectionMarker } from "./InspectionMarker";
 import type { GeoCoordinate, PlaybackState } from "@/types/spatial";
 
 export interface GlobeSceneProps {
@@ -27,6 +29,10 @@ export interface GlobeSceneProps {
   airQualityOpacity?: number;
   progressPercent?: number;
   monthOfYear?: number;
+  mode?: "explore" | "inspect";
+  inspectedPoint?: { lat: number; lon: number } | null;
+  flyToCoord?: { lat: number; lon: number; timestamp: number } | null;
+  onSelectPoint?: (point: { lat: number; lon: number }) => void;
   onCoordinateChange?: (coord: GeoCoordinate) => void;
   onZoomChange?: (zoom: number) => void;
 }
@@ -46,6 +52,10 @@ export function GlobeScene({
   airQualityOpacity = 0.7,
   progressPercent = 85,
   monthOfYear = 1.0,
+  mode = "explore",
+  inspectedPoint = null,
+  flyToCoord = null,
+  onSelectPoint,
   onCoordinateChange,
   onZoomChange,
 }: GlobeSceneProps) {
@@ -62,7 +72,6 @@ export function GlobeScene({
     const targetDistance = Math.max(2.10, Math.min(8.0, baseDistance / zoom));
     const currentDist = camera.position.length();
 
-    // Reposition only when triggered externally by UI buttons
     if (Math.abs(currentDist - targetDistance) > 0.12) {
       const currentDir = camera.position.clone().normalize();
       camera.position.copy(currentDir.multiplyScalar(targetDistance));
@@ -82,6 +91,25 @@ export function GlobeScene({
       }
     }
   }, [resetOrientationTrigger, camera]);
+
+  // Handle "Fly to Location" camera centering
+  useEffect(() => {
+    if (flyToCoord && controlsRef.current && earthGroupRef.current) {
+      const earthRotY = earthGroupRef.current.rotation.y;
+      const latRad = flyToCoord.lat * (Math.PI / 180);
+      const lonRad = (flyToCoord.lon * (Math.PI / 180)) + earthRotY;
+      const dist = Math.max(3.2, camera.position.length());
+      const cosLat = dist * Math.cos(latRad);
+      const targetX = cosLat * Math.cos(lonRad);
+      const targetY = dist * Math.sin(latRad);
+      const targetZ = -cosLat * Math.sin(lonRad);
+
+      camera.position.set(targetX, targetY, targetZ);
+      camera.lookAt(0, 0, 0);
+      controlsRef.current.target.set(0, 0, 0);
+      controlsRef.current.update();
+    }
+  }, [flyToCoord, camera]);
 
   // Animation frame loop: Earth rotation + zoom telemetry + coordinate calculation
   useFrame((_, delta) => {
@@ -104,17 +132,13 @@ export function GlobeScene({
 
     // Vector pointing from globe center to camera
     const dir = camera.position.clone().normalize();
-
-    // Account for planetary rotation in coordinate calculation
     const earthRotationY = earthGroupRef.current ? earthGroupRef.current.rotation.y : 0;
 
     // Compute latitude and longitude in degrees matching Three.js UV texture space
     const lat = Math.asin(Math.max(-1, Math.min(1, dir.y))) * (180 / Math.PI);
     let lon = (Math.atan2(-dir.z, dir.x) - earthRotationY) * (180 / Math.PI);
-    // Normalize to -180 to 180
     lon = ((lon + 180) % 360 + 360) % 360 - 180;
 
-    // Emit only if changed by at least 0.05 degrees to minimize React state updates
     if (
       Math.abs(lat - lastEmittedCoord.current.lat) > 0.05 ||
       Math.abs(lon - lastEmittedCoord.current.lon) > 0.05
@@ -164,7 +188,40 @@ export function GlobeScene({
           progressPercent={progressPercent}
           monthOfYear={monthOfYear}
         />
+        <CountryBordersLayer radius={2} opacity={0.32} color="#ffffff" />
         <GeographicGraticule radius={2} />
+
+        {/* 3D Spatial Inspection Marker (anchored to globe surface) */}
+        {inspectedPoint && (
+          <InspectionMarker
+            latitude={inspectedPoint.lat}
+            longitude={inspectedPoint.lon}
+            radius={2.018}
+          />
+        )}
+
+        {/* Invisible Click-to-Inspect Interaction Shell (ONLY active when in Inspect Mode) */}
+        {mode === "inspect" && (
+          <mesh
+            visible={false}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!earthGroupRef.current || !onSelectPoint) return;
+              // Convert intersection point from world to Earth local space
+              const local = earthGroupRef.current.worldToLocal(e.point.clone()).normalize();
+              const lat = Math.asin(Math.max(-1, Math.min(1, local.y))) * (180 / Math.PI);
+              let lon = Math.atan2(-local.z, local.x) * (180 / Math.PI);
+              lon = ((lon + 180) % 360 + 360) % 360 - 180;
+              onSelectPoint({
+                lat: parseFloat(lat.toFixed(4)),
+                lon: parseFloat(lon.toFixed(4)),
+              });
+            }}
+          >
+            <sphereGeometry args={[2.022, 64, 64]} />
+            <meshBasicMaterial transparent opacity={0} />
+          </mesh>
+        )}
       </group>
       <AtmosphereGlow radius={2} color="#52a0ff" />
 
