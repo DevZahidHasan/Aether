@@ -833,3 +833,125 @@ export function computeLocationTelemetry(
     historicalAqi,
   };
 }
+
+/**
+ * Resolves any free-form geographic search query into exact latitude and longitude.
+ * Supports coordinates, cities, countries, and regional features.
+ */
+export function resolveSearchCoordinates(query: string): { lat: number; lon: number } | null {
+  const q = query.trim().toLowerCase();
+  if (!q) return null;
+
+  // 1. Direct coordinate regex matching (e.g. "23.81, 90.41" or "23.81° N, 90.41° E")
+  const coordMatch = q.match(/([-+]?\d+(?:\.\d+)?)\s*(?:°?\s*([ns]))?[\s,]+([-+]?\d+(?:\.\d+)?)\s*(?:°?\s*([ew]))?/i);
+  if (coordMatch) {
+    let lat = parseFloat(coordMatch[1] ?? "0");
+    let lon = parseFloat(coordMatch[3] ?? "0");
+    if (coordMatch[2]?.toLowerCase() === "s") lat = -Math.abs(lat);
+    if (coordMatch[4]?.toLowerCase() === "w") lon = -Math.abs(lon);
+    if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+      return { lat, lon };
+    }
+  }
+
+  // 2. Common country & region shortcuts
+  if (q === "usa" || q === "us" || q === "america") {
+    return { lat: 38.9072, lon: -77.0369 };
+  }
+  if (q === "uk" || q === "britain" || q === "england") {
+    return { lat: 51.5074, lon: -0.1278 };
+  }
+  if (q === "uae" || q === "emirates" || q === "dubai") {
+    return { lat: 25.2048, lon: 55.2708 };
+  }
+  if (q === "bangladesh" || q === "bd") {
+    return { lat: 23.8103, lon: 90.4125 };
+  }
+  if (q === "india") {
+    return { lat: 28.6139, lon: 77.209 };
+  }
+  if (q === "china") {
+    return { lat: 39.9042, lon: 116.4074 };
+  }
+  if (q === "russia") {
+    return { lat: 55.7558, lon: 37.6173 };
+  }
+  if (q === "japan") {
+    return { lat: 35.6762, lon: 139.6503 };
+  }
+  if (q === "germany") {
+    return { lat: 52.52, lon: 13.405 };
+  }
+  if (q === "france") {
+    return { lat: 48.8566, lon: 2.3522 };
+  }
+  if (q === "brazil") {
+    return { lat: -15.7975, lon: -47.8919 };
+  }
+  if (q === "canada") {
+    return { lat: 45.4215, lon: -75.6972 };
+  }
+  if (q === "australia") {
+    return { lat: -33.8688, lon: 151.2093 };
+  }
+
+  // 3. Search Bangladesh Locations (Divisions & Districts)
+  for (const loc of BANGLADESH_LOCATIONS) {
+    if (loc.name.toLowerCase() === q || q.includes(loc.name.toLowerCase()) || loc.name.toLowerCase().includes(q)) {
+      return { lat: loc.lat, lon: loc.lon };
+    }
+  }
+
+  // 4. Search Global Locations (Cities)
+  for (const loc of GLOBAL_LOCATIONS) {
+    if (loc.name.toLowerCase() === q || q.includes(loc.name.toLowerCase()) || loc.name.toLowerCase().includes(q)) {
+      return { lat: loc.lat, lon: loc.lon };
+    }
+  }
+
+  // 5. Search 177 Sovereign Nations
+  for (const country of PRECOMPUTED_COUNTRIES) {
+    const countryName = country.name.toLowerCase();
+    if (countryName === q || q.includes(countryName) || countryName.includes(q)) {
+      const cityMatch = GLOBAL_LOCATIONS.find((loc) => 
+        loc.countryOrRegion.toLowerCase().includes(countryName) || countryName.includes(loc.countryOrRegion.toLowerCase())
+      );
+      if (cityMatch) {
+        return { lat: cityMatch.lat, lon: cityMatch.lon };
+      }
+      return {
+        lat: (country.bbox[1] + country.bbox[3]) / 2,
+        lon: (country.bbox[0] + country.bbox[2]) / 2,
+      };
+    }
+  }
+
+  // 6. Special Planetary Regions & Basins
+  if (q.includes("arctic") || q.includes("north pole")) {
+    return { lat: 78.0, lon: 0.0 };
+  }
+  if (q.includes("antarctica") || q.includes("south pole")) {
+    return { lat: -78.0, lon: 0.0 };
+  }
+  if (q.includes("amazon") || q.includes("manaus")) {
+    return { lat: -3.12, lon: -60.02 };
+  }
+  if (q.includes("sahara")) {
+    return { lat: 23.4, lon: 12.5 };
+  }
+  if (q.includes("himalaya") || q.includes("everest")) {
+    return { lat: 27.98, lon: 86.92 };
+  }
+  if (q.includes("pacific")) {
+    return { lat: 0.0, lon: -160.0 };
+  }
+  if (q.includes("atlantic")) {
+    return { lat: 0.0, lon: -30.0 };
+  }
+  if (q.includes("indian ocean")) {
+    return { lat: -10.0, lon: 75.0 };
+  }
+
+  return null;
+}
+

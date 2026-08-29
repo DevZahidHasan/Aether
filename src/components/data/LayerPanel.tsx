@@ -85,7 +85,7 @@ export function LayerPanel({
       id="layer-panel"
       role="region"
       aria-label="Climate data layers"
-      className="fixed top-14 left-4 z-panel w-[340px] max-h-[calc(100vh-140px)] bg-[#1e1f20] border border-[#3c4043] rounded-2xl shadow-2xl shadow-black/80 flex flex-col select-none overflow-hidden animate-in fade-in slide-in-from-left-2 duration-200"
+      className="fixed top-14 left-2 right-2 sm:right-auto sm:left-4 z-panel w-auto sm:w-[340px] max-h-[calc(100vh-120px)] bg-[#1e1f20] border border-[#3c4043] rounded-2xl shadow-2xl shadow-black/80 flex flex-col select-none overflow-hidden animate-in fade-in slide-in-from-left-2 duration-200"
     >
       {/* Google-Style Header with Circular Close Button */}
       <div className="px-4 py-3.5 border-b border-[#3c4043]/60 flex items-center justify-between bg-[#1e1f20]">

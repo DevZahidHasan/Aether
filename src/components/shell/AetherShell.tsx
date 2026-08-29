@@ -14,7 +14,7 @@ import { WindLegend } from "@/components/data/WindLegend";
 import { AirQualityLegend } from "@/components/data/AirQualityLegend";
 import { TemporalRegion } from "@/components/temporal/TemporalRegion";
 import { InspectionPanel } from "@/components/spatial/InspectionPanel";
-import { computeLocationTelemetry } from "@/lib/spatial/locationIntelligence";
+import { computeLocationTelemetry, resolveSearchCoordinates } from "@/lib/spatial/locationIntelligence";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import type { ApplicationMode, GeoCoordinate, PlaybackState } from "@/types/spatial";
 import type { ClimateLayerId } from "@/types/climate";
@@ -73,6 +73,7 @@ export function AetherShell() {
   // Spatial Inspection State (Phase 7)
   const [inspectedPoint, setInspectedPoint] = useState<{ lat: number; lon: number } | null>(null);
   const [flyToCoord, setFlyToCoord] = useState<{ lat: number; lon: number; timestamp: number } | null>(null);
+  const [isLegendsOpenMobile, setIsLegendsOpenMobile] = useState<boolean>(false);
 
   // Climate Layers State
   const [layers, setLayers] = useState<LayerItemConfig[]>(INITIAL_LAYERS);
@@ -605,46 +606,17 @@ export function AetherShell() {
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
         onSelectLocation={(query) => {
-          const q = query.trim().toLowerCase();
-          const coordMatch = q.match(/([-+]?\d+(?:\.\d+)?)\s*(?:°?\s*([ns]))?[\s,]+([-+]?\d+(?:\.\d+)?)\s*(?:°?\s*([ew]))?/i);
-          if (coordMatch) {
-            let lat = parseFloat(coordMatch[1] ?? "0");
-            let lon = parseFloat(coordMatch[3] ?? "0");
-            if (coordMatch[2]?.toLowerCase() === "s") lat = -Math.abs(lat);
-            if (coordMatch[4]?.toLowerCase() === "w") lon = -Math.abs(lon);
-            setFlyToCoord({ lat, lon, timestamp: Date.now() });
-            return;
-          }
+          const resolved = resolveSearchCoordinates(query);
+          const target = resolved ?? { lat: 23.81, lon: 90.41 };
 
-          if (q.includes("dhaka") || q.includes("bangladesh")) {
-            setFlyToCoord({ lat: 23.81, lon: 90.41, timestamp: Date.now() });
-          } else if (q.includes("chattogram") || q.includes("chittagong")) {
-            setFlyToCoord({ lat: 22.35, lon: 91.78, timestamp: Date.now() });
-          } else if (q.includes("sylhet")) {
-            setFlyToCoord({ lat: 24.89, lon: 91.87, timestamp: Date.now() });
-          } else if (q.includes("delhi") || q.includes("india")) {
-            setFlyToCoord({ lat: 28.61, lon: 77.21, timestamp: Date.now() });
-          } else if (q.includes("arctic") || q.includes("north pole")) {
-            setFlyToCoord({ lat: 78.0, lon: 0.0, timestamp: Date.now() });
-          } else if (q.includes("antarctica") || q.includes("south pole")) {
-            setFlyToCoord({ lat: -78.0, lon: 0.0, timestamp: Date.now() });
-          } else if (q.includes("nicaragua") || q.includes("managua")) {
-            setFlyToCoord({ lat: 12.92, lon: -85.91, timestamp: Date.now() });
-          } else if (q.includes("amazon") || q.includes("manaus") || q.includes("brazil")) {
-            setFlyToCoord({ lat: -3.12, lon: -60.02, timestamp: Date.now() });
-          } else if (q.includes("tokyo") || q.includes("japan")) {
-            setFlyToCoord({ lat: 35.68, lon: 139.69, timestamp: Date.now() });
-          } else if (q.includes("london") || q.includes("uk")) {
-            setFlyToCoord({ lat: 51.51, lon: -0.13, timestamp: Date.now() });
-          } else if (q.includes("paris") || q.includes("france")) {
-            setFlyToCoord({ lat: 48.86, lon: 2.35, timestamp: Date.now() });
-          } else if (q.includes("new york") || q.includes("usa") || q.includes("america")) {
-            setFlyToCoord({ lat: 40.71, lon: -74.01, timestamp: Date.now() });
-          } else if (q.includes("cairo") || q.includes("egypt") || q.includes("sahara")) {
-            setFlyToCoord({ lat: 25.0, lon: 20.0, timestamp: Date.now() });
-          } else {
-            setFlyToCoord({ lat: 35.0, lon: 15.0, timestamp: Date.now() });
-          }
+          // 1. Engage Inspect Mode so the area is interrogated
+          setMode("inspect");
+
+          // 2. Pin the geographic location (renders 3D radar beacon and opens InspectionPanel)
+          setInspectedPoint({ lat: target.lat, lon: target.lon });
+
+          // 3. Cinematic 3D Great-Circle flight to center camera on pinned coordinate
+          setFlyToCoord({ lat: target.lat, lon: target.lon, timestamp: Date.now() });
         }}
       />
 
@@ -683,15 +655,15 @@ export function AetherShell() {
       </div>
 
       {/* Center Coordinates Readout Pill (Bottom-Center above timeline) */}
-      <div className="fixed bottom-[72px] left-1/2 -translate-x-1/2 z-controls">
+      <div className="fixed bottom-[72px] left-1/2 -translate-x-1/2 z-controls max-w-[calc(100vw-110px)] sm:max-w-none">
         <CoordinateDisplay
           coordinate={coordinate}
           activeLayerReadouts={activeLayerReadouts}
         />
       </div>
 
-      {/* Calibrated Distance Scale Bar (Bottom-Right above timeline) */}
-      <div className="fixed bottom-[72px] right-4 z-controls">
+      {/* Calibrated Distance Scale Bar (Bottom-Right above timeline, hidden on narrow mobile) */}
+      <div className="hidden sm:block fixed bottom-[72px] right-4 z-controls">
         <ScaleBar zoom={zoom} />
       </div>
 
@@ -711,36 +683,56 @@ export function AetherShell() {
 
       {/* Scientific Legends Stack (Top-Right below TopBar, hidden when InspectionPanel is open) */}
       {!inspectedMeasurement && (isTemperatureActive || isPrecipitationActive || isWindActive || isAirQualityActive) && (
-        <div className="fixed top-14 right-4 z-controls flex flex-col gap-2.5 items-end animate-in fade-in duration-300">
-          {isTemperatureActive && (
-            <ClimateLegend
-              active={isTemperatureActive}
-              opacity={temperatureOpacity}
-              progressPercent={progressPercent}
-            />
-          )}
-          {isPrecipitationActive && (
-            <PrecipitationLegend
-              active={isPrecipitationActive}
-              opacity={precipitationOpacity}
-              progressPercent={progressPercent}
-            />
-          )}
-          {isWindActive && (
-            <WindLegend
-              active={isWindActive}
-              opacity={windOpacity}
-              progressPercent={progressPercent}
-            />
-          )}
-          {isAirQualityActive && (
-            <AirQualityLegend
-              active={isAirQualityActive}
-              opacity={airQualityOpacity}
-              progressPercent={progressPercent}
-            />
-          )}
-        </div>
+        <>
+          {/* Mobile Legend Trigger Chip (< 768px) */}
+          <div className="md:hidden fixed top-14 right-2 z-controls">
+            <button
+              type="button"
+              onClick={() => setIsLegendsOpenMobile((prev) => !prev)}
+              aria-label={isLegendsOpenMobile ? "Collapse active layer legends" : "Expand active layer legends"}
+              className="px-2.5 py-1 rounded-full bg-[#1e1f20] border border-[#383a3d] text-[10px] font-mono text-[#c4c7c5] hover:text-white flex items-center gap-1.5 shadow-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-aether-accent animate-pulse" />
+              <span>LEGEND</span>
+              <span className="text-[8px] text-[#9aa0a6]">{isLegendsOpenMobile ? "▲" : "▼"}</span>
+            </button>
+          </div>
+
+          <div
+            className={`fixed top-22 md:top-14 right-2 md:right-4 z-controls flex-col gap-2.5 items-end ${
+              isLegendsOpenMobile ? "flex" : "hidden md:flex"
+            } animate-in fade-in duration-200`}
+          >
+            {isTemperatureActive && (
+              <ClimateLegend
+                active={isTemperatureActive}
+                opacity={temperatureOpacity}
+                progressPercent={progressPercent}
+              />
+            )}
+            {isPrecipitationActive && (
+              <PrecipitationLegend
+                active={isPrecipitationActive}
+                opacity={precipitationOpacity}
+                progressPercent={progressPercent}
+              />
+            )}
+            {isWindActive && (
+              <WindLegend
+                active={isWindActive}
+                opacity={windOpacity}
+                progressPercent={progressPercent}
+              />
+            )}
+            {isAirQualityActive && (
+              <AirQualityLegend
+                active={isAirQualityActive}
+                opacity={airQualityOpacity}
+                progressPercent={progressPercent}
+              />
+            )}
+          </div>
+        </>
       )}
 
       {/* Pinned Bottom Timeline Navigation Bar (56px) */}

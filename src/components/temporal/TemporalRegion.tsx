@@ -71,11 +71,11 @@ export function TemporalRegion({
     <footer
       role="region"
       aria-label="Temporal dimension navigation"
-      className={`fixed bottom-0 left-0 right-0 h-timeline z-controls bg-aether-surface border-t border-aether-border flex items-center justify-between pl-12 pr-4 sm:px-6 gap-4 select-none ${className}`}
+      className={`fixed bottom-0 left-0 right-0 h-timeline z-controls bg-aether-surface border-t border-aether-border flex items-center justify-between px-3 sm:px-6 gap-2 sm:gap-4 select-none ${className}`}
     >
       {/* 1. Date Range & Baseline Identification */}
-      <div className="flex items-center gap-2 font-mono text-[11px] text-aether-fg-muted shrink-0">
-        <span className="hidden sm:inline text-aether-fg-secondary">
+      <div className="hidden md:flex items-center gap-2 font-mono text-[11px] text-aether-fg-muted shrink-0">
+        <span className="text-aether-fg-secondary">
           {baselinePeriod}
         </span>
       </div>
@@ -146,12 +146,12 @@ export function TemporalRegion({
 
       {/* 3. Playback Controls & Speed Selector */}
       <div className="flex items-center gap-1.5 shrink-0">
-        {/* Step Back */}
+        {/* Step Back (Hidden on mobile) */}
         <button
           type="button"
           aria-label="Step backward"
           onClick={onStepBack}
-          className="w-7 h-7 flex items-center justify-center rounded-sm bg-aether-surface-elevated hover:bg-aether-surface-hover border border-aether-border text-aether-fg-muted hover:text-aether-fg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent focus-visible:ring-offset-1 focus-visible:ring-offset-aether-surface"
+          className="hidden sm:flex w-7 h-7 items-center justify-center rounded-sm bg-aether-surface-elevated hover:bg-aether-surface-hover border border-aether-border text-aether-fg-muted hover:text-aether-fg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent focus-visible:ring-offset-1 focus-visible:ring-offset-aether-surface"
         >
           <svg className="w-3 h-3 fill-current" viewBox="0 0 16 16">
             <polygon points="12,3 5,8 12,13" />
@@ -177,12 +177,12 @@ export function TemporalRegion({
           )}
         </button>
 
-        {/* Step Forward */}
+        {/* Step Forward (Hidden on mobile) */}
         <button
           type="button"
           aria-label="Step forward"
           onClick={onStepForward}
-          className="w-7 h-7 flex items-center justify-center rounded-sm bg-aether-surface-elevated hover:bg-aether-surface-hover border border-aether-border text-aether-fg-muted hover:text-aether-fg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent focus-visible:ring-offset-1 focus-visible:ring-offset-aether-surface"
+          className="hidden sm:flex w-7 h-7 items-center justify-center rounded-sm bg-aether-surface-elevated hover:bg-aether-surface-hover border border-aether-border text-aether-fg-muted hover:text-aether-fg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent focus-visible:ring-offset-1 focus-visible:ring-offset-aether-surface"
         >
           <svg className="w-3 h-3 fill-current" viewBox="0 0 16 16">
             <polygon points="4,3 11,8 4,13" />
@@ -194,14 +194,14 @@ export function TemporalRegion({
           type="button"
           aria-label={`Playback speed: ${playbackSpeed}x. Click to change`}
           onClick={onChangeSpeed}
-          className="h-7 px-2 font-mono text-[10px] text-aether-fg-muted hover:text-aether-fg bg-aether-bg-secondary border border-aether-border rounded-sm transition-colors cursor-pointer ml-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent focus-visible:ring-offset-1 focus-visible:ring-offset-aether-surface"
+          className="h-7 px-1.5 sm:px-2 font-mono text-[10px] text-aether-fg-muted hover:text-aether-fg bg-aether-bg-secondary border border-aether-border rounded-sm transition-colors cursor-pointer sm:ml-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent focus-visible:ring-offset-1 focus-visible:ring-offset-aether-surface"
         >
           {playbackSpeed}×
         </button>
       </div>
 
       {/* 4. Formatted Date Readout */}
-      <div className="min-w-[110px] text-right font-mono text-[12px] font-medium text-aether-fg shrink-0">
+      <div className="min-w-[85px] sm:min-w-[110px] text-right font-mono text-[11px] sm:text-[12px] font-medium text-aether-fg shrink-0">
         {currentDate}
       </div>
     </footer>

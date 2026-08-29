@@ -59,7 +59,7 @@ export function InspectionPanel({
   return (
     <aside
       aria-label="Geographic Point Inspection Panel"
-      className="absolute top-16 right-4 z-40 w-96 max-w-[calc(100vw-2rem)] max-h-[calc(100vh-8.5rem)] overflow-y-auto bg-[#1e1f20] border border-[#383a3d] rounded-2xl shadow-2xl shadow-black/90 text-white flex flex-col p-5 font-sans animate-in fade-in slide-in-from-right-4 duration-200"
+      className="fixed sm:absolute top-16 left-2 right-2 sm:left-auto sm:right-4 z-40 w-auto sm:w-96 max-h-[58vh] sm:max-h-[calc(100vh-8.5rem)] overflow-y-auto bg-[#1e1f20] border border-[#383a3d] rounded-2xl shadow-2xl shadow-black/90 text-white flex flex-col p-4 sm:p-5 font-sans animate-in fade-in slide-in-from-right-4 duration-200"
     >
       {/* Screen Reader Live Telemetry Announcement */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">

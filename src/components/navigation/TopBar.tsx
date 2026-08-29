@@ -58,7 +58,7 @@ export function TopBar({
       </div>
 
       {/* Right: Interface Controls & Triggers */}
-      <nav aria-label="Instrument triggers" className="flex items-center gap-2">
+      <nav aria-label="Instrument triggers" className="flex items-center gap-1.5 sm:gap-2">
         {/* Layer Panel Trigger */}
         <button
           type="button"
@@ -66,7 +66,7 @@ export function TopBar({
           aria-expanded={isLayerPanelOpen}
           aria-controls="layer-panel"
           onClick={onToggleLayerPanel}
-          className={`h-7 px-2.5 rounded-sm border text-[11px] font-mono tracking-wider transition-colors flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent focus-visible:ring-offset-1 focus-visible:ring-offset-aether-bg ${
+          className={`h-7 sm:h-7.5 px-2 sm:px-2.5 rounded-sm border text-[10.5px] sm:text-[11px] font-mono tracking-wider transition-colors flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent focus-visible:ring-offset-1 focus-visible:ring-offset-aether-bg ${
             isLayerPanelOpen
               ? "bg-aether-accent-soft text-aether-accent border-aether-accent"
               : "bg-aether-surface hover:bg-aether-surface-hover text-aether-fg-secondary border-aether-border"
@@ -95,14 +95,14 @@ export function TopBar({
           aria-label="Inspect mode (Shortcut: I)"
           aria-pressed={currentMode === "inspect"}
           onClick={() => onModeChange?.(currentMode === "inspect" ? "explore" : "inspect")}
-          className={`h-7 px-2.5 rounded-sm border text-[11px] font-mono tracking-wider transition-colors flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent focus-visible:ring-offset-1 focus-visible:ring-offset-aether-bg ${
+          className={`h-7 sm:h-7.5 px-2 sm:px-2.5 rounded-sm border text-[10.5px] sm:text-[11px] font-mono tracking-wider transition-colors flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent focus-visible:ring-offset-1 focus-visible:ring-offset-aether-bg ${
             currentMode === "inspect"
               ? "bg-aether-accent-soft text-aether-accent border-aether-accent"
               : "bg-aether-surface hover:bg-aether-surface-hover text-aether-fg-secondary border-aether-border"
           }`}
         >
           <span>INSPECT</span>
-          <kbd className="text-[9px] text-aether-fg-muted bg-aether-bg px-1 py-0.5 rounded border border-aether-border-subtle">
+          <kbd className="hidden sm:inline-block text-[9px] text-aether-fg-muted bg-aether-bg px-1 py-0.5 rounded border border-aether-border-subtle">
             I
           </kbd>
         </button>
@@ -112,7 +112,7 @@ export function TopBar({
           type="button"
           aria-label="Search geographic locations (Shortcut: /)"
           onClick={onOpenSearch}
-          className="h-7 px-2.5 rounded-sm border border-aether-border bg-aether-surface hover:bg-aether-surface-hover text-aether-fg-secondary text-[11px] font-mono tracking-wider transition-colors flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent focus-visible:ring-offset-1 focus-visible:ring-offset-aether-bg"
+          className="h-7 sm:h-7.5 px-2 sm:px-2.5 rounded-sm border border-aether-border bg-aether-surface hover:bg-aether-surface-hover text-aether-fg-secondary text-[10.5px] sm:text-[11px] font-mono tracking-wider transition-colors flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aether-accent focus-visible:ring-offset-1 focus-visible:ring-offset-aether-bg"
         >
           <svg
             className="w-3 h-3"
@@ -128,7 +128,7 @@ export function TopBar({
             <line x1="16.5" y1="16.5" x2="21" y2="21" />
           </svg>
           <span>SEARCH</span>
-          <kbd className="text-[9px] text-aether-fg-muted bg-aether-bg px-1 py-0.5 rounded border border-aether-border-subtle">
+          <kbd className="hidden sm:inline-block text-[9px] text-aether-fg-muted bg-aether-bg px-1 py-0.5 rounded border border-aether-border-subtle">
             /
           </kbd>
         </button>
